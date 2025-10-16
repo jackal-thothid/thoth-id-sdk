@@ -1,0 +1,26 @@
+{
+  "name": "thoth-id-sdk2",
+  "version": "0.0.1",
+  "description": "SDK to consult @view methods of ThothNamer nanocontract",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test:verbose": "jest tests/sdk.verbose.test.ts --verbose"
+  },
+  "keywords": ["thoth", "id", "sdk"],
+  "author": "Jackal thoth-id",
+  "license": "MIT",
+  "dependencies": {
+    "cross-fetch": "^4.0.0",
+    "bs58": "^5.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "@types/jest": "^29.5.0",
+    "@types/bs58": "^4.0.4"
+  }
+}

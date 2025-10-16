@@ -1,0 +1,17 @@
+{
+  "sdkOptions": {
+    "host": "192.168.2.105",
+    "nodePort": 8080,
+    "protocol": "http",
+    "contractId": "00002d229ad91439369f2c058175c2bae05842b2ca3eba4a589f8317a0fcb528"
+  },
+  "testData": {
+    "existingName": "bla",
+    "availableName": "blabla",
+    "nameForFeeCalculation": "abuble",
+    "nameForValidation": "validname",
+    "invalidNameForValidation": "Invalid-Name",
+    "ownerAddress": "WRqBSi5jc74P8tRo7CmgiGByA1eTzfMh7B",
+    "managerAddress": "WRqBSi5jc74P8tRo7CmgiGByA1eTzfMh7B"
+  }
+}
