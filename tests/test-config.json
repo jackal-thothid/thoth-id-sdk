@@ -1,17 +1,17 @@
 {
   "sdkOptions": {
-    "host": "192.168.2.105",
+    "host": "172.15.6.109",
     "nodePort": 8080,
     "protocol": "http",
-    "contractId": "00004dd558f15b85e27c899cf4f957ef0ccb06bae9f161bf34ba78908be810d2"
+    "contractId": "000069d32c32b3bc2da63708f286edab96da1a469971cfc61d8c650d7f9f6cbf"
   },
   "testData": {
-    "existingName": "name1e1525",
+    "existingName": "name0e5dff",
     "availableName": "testname2",
     "nameForFeeCalculation": "feecalc",
     "nameForValidation": "validname",
     "invalidNameForValidation": "Invalid-Name",
-    "ownerAddress": "WgLgULhQDrRXXzQgk8B1PQ3s9eo1Ssok62",
-    "managerAddress": "WgLgULhQDrRXXzQgk8B1PQ3s9eo1Ssok62"
+    "ownerAddress": "WRqBSi5jc74P8tRo7CmgiGByA1eTzfMh7B",
+    "managerAddress": "WRqBSi5jc74P8tRo7CmgiGByA1eTzfMh7B"
   }
 }

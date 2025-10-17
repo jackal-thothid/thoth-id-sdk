@@ -24,6 +24,38 @@ function write_config(file_name: string, data: any) {
     fs.writeFileSync(config_path, JSON.stringify(data, null, 2));
 }
 
+async function get_wallet_history(wallet_id: string, headless_api_key: string, host: string, port: number) {
+    const url = `http://${host}:${port}/wallet/tx-history/?limit=1`;
+    const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': headless_api_key,
+            'x-wallet-id': wallet_id
+        }
+    });
+
+    if (!response.ok) {
+        const error_text = await response.text();
+        throw new Error(`Failed to get wallet history: ${response.status} ${response.statusText} - ${error_text}`);
+    }
+
+    const result = await response.json();
+    console.log('Wallet history retrieved successfully.');
+    console.log(result);
+    return result;
+}
+
+async function wait_new_block(wallet_id: string, headless_api_key: string, host: string, port: number) {
+    while (true) {
+        const wallet_history = await get_wallet_history(wallet_id, headless_api_key, host, port);
+        if (wallet_history[0].first_block != null) {
+            break;
+        }
+        await new Promise(resolve => setTimeout(resolve, 5000));
+    }
+}
+
 // --- Main setup flow ---
 async function setup() {
     try {
@@ -73,9 +105,12 @@ async function setup() {
         console.log('Configuration files updated successfully.');
 
         console.log('\nWaiting 5 seconds...');
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await wait_new_block(env_config.master_id, env_config.headless_api_key, env_config.master_wallet_host, env_config.master_wallet_port);
 
         await create_name(env_config, test_config, contract_id, address_master);
+        await wait_new_block(env_config.master_id, env_config.headless_api_key, env_config.master_wallet_host, env_config.master_wallet_port);
+
+        console.log('\nSetup completed successfully.');
 
     } catch (error) {
         console.error('Error during setup:', error);

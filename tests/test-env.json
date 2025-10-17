@@ -1,10 +1,10 @@
 {
-  "master_wallet_host": "localhost",
+  "master_wallet_host": "172.15.6.109",
   "master_wallet_port": 8000,
   "headless_api_key": "_YOUR_HEADLESS_API_KEY_",
-  "node_wallet_host": "localhost",
+  "node_wallet_host": "172.15.6.109",
   "node_wallet_port": 8080,
-  "master_id": "master_wallet_id_dc5558",
+  "master_id": "master_wallet_id_0e5dff",
   "master_seedkey": "genesis",
   "blueprint_id": "8d7b1c46b6420b33eaa42f29a52b1c5e32e54802ed3444f987db1fb5be561306"
 }
