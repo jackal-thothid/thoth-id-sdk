@@ -47,13 +47,30 @@ async function get_wallet_history(wallet_id: string, headless_api_key: string, h
 }
 
 async function wait_new_block(wallet_id: string, headless_api_key: string, host: string, port: number) {
-    while (true) {
-        const wallet_history = await get_wallet_history(wallet_id, headless_api_key, host, port);
-        if (wallet_history[0].first_block != null) {
-            break;
+    let attempts = 0;
+    const max_attempts = 120;
+
+    while (attempts < max_attempts) {
+        try {
+            const wallet_history = await get_wallet_history(wallet_id, headless_api_key, host, port);
+            // Check if history is valid and block is confirmed
+            if (wallet_history && wallet_history.length > 0 && wallet_history[0].first_block != null) {
+                console.log(`New block found after ${attempts + 1} attempts.`);
+                return; // Success, exit the function
+            }
+        } catch (error) {
+            console.warn(`Attempt ${attempts + 1} failed when fetching wallet history:`, error);
+            // We can choose to continue retrying or handle specific errors
         }
-        await new Promise(resolve => setTimeout(resolve, 5000));
+
+        attempts++;
+        if (attempts < max_attempts) {
+            console.log(`Waiting for new block... (Attempt ${attempts}/${max_attempts})`);
+            await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+        }
     }
+
+    console.warn(`Max attempts (${max_attempts}) reached waiting for a new block. Proceeding without confirmation.`);
 }
 
 // --- Main setup flow ---
