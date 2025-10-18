@@ -97,12 +97,12 @@ export class ThothIdSDK {
   }
 
   // --- Wrappers para todos os @view methods listados ---
-  async is_name_available(name: string, contractId?: string) {
+  async isNameAvailable(name: string, contractId?: string) {
     const now_timestamp = Math.floor(Date.now() / 1000);
     return this.callView("is_name_available", [name, now_timestamp], contractId);
   }
 
-  async resolve_name(name: string, contractId?: string) {
+  async resolveName(name: string, contractId?: string) {
     const now_timestamp = Math.floor(Date.now() / 1000);
     const hexAddress = await this.callView("resolve_name", [name, now_timestamp], contractId);
     if (typeof hexAddress === 'string' && /^[0-9a-fA-F]+$/.test(hexAddress)) {
@@ -112,11 +112,11 @@ export class ThothIdSDK {
     return hexAddress;
   }
 
-  async get_name_data(name: string, contractId?: string) {
+  async getNameData(name: string, contractId?: string) {
     return this.callView("get_name_data", [name], contractId);
   }
 
-  async get_name_owner(name: string, contractId?: string) {
+  async getNameOwner(name: string, contractId?: string) {
     const hexAddress = await this.callView("get_name_owner", [name], contractId);
     if (typeof hexAddress === 'string' && /^[0-9a-fA-F]+$/.test(hexAddress)) {
         const buffer = Buffer.from(hexAddress, 'hex');
@@ -125,86 +125,86 @@ export class ThothIdSDK {
     return hexAddress;
   }
 
-  async get_name_expiration_info(name: string, contractId?: string) {
+  async getNameExpirationInfo(name: string, contractId?: string) {
     const now_timestamp = Math.floor(Date.now() / 1000);
     return this.callView("get_name_expiration_info", [name, now_timestamp], contractId);
   }
 
-  async get_name_expiration_date(name: string, contractId?: string) {
+  async getNameExpirationDate(name: string, contractId?: string) {
     return this.callView("get_name_expiration_date", [name], contractId);
   }
 
-  async validate_name(name: string, contractId?: string) {
+  async validateName(name: string, contractId?: string) {
     return this.callView("validate_name", [name], contractId);
   }
 
-  async validate_key_format(key: string, value: string, contractId?: string) {
+  async validateKeyFormat(key: string, value: string, contractId?: string) {
     return this.callView("validate_key_format", [key, value], contractId);
   }
 
-  async get_dev_address(contractId?: string) {
+  async getDevAddress(contractId?: string) {
     return this.callView("get_dev_address", [], contractId);
   }
 
-  async get_contract_domain(contractId?: string) {
+  async getContractDomain(contractId?: string) {
     return this.callView("get_contract_domain", [], contractId);
   }
 
-  async check_name_ownership(name: string, address: string, contractId?: string) {
+  async checkNameOwnership(name: string, address: string, contractId?: string) {
     const now_timestamp = Math.floor(Date.now() / 1000);
     return this.callView("check_name_ownership", [name, address, now_timestamp], contractId);
   }
 
-  async check_name_status(name: string, contractId?: string) {
+  async checkNameStatus(name: string, contractId?: string) {
     const now_timestamp = Math.floor(Date.now() / 1000);
     return this.callView("check_name_status", [name, now_timestamp], contractId);
   }
 
-  async get_fee_info(name: string, contractId?: string) {
+  async getFeeInfo(name: string, contractId?: string) {
     return this.callView("get_fee_info", [name], contractId);
   }
 
-  async calculate_fee(name: string, contractId?: string) {
+  async calculateFee(name: string, contractId?: string) {
     return this.callView("calculate_fee", [name], contractId);
   }
 
-  async get_fee_multiplier(length: number, contractId?: string) {
+  async getFeeMultiplier(length: number, contractId?: string) {
     return this.callView("get_fee_multiplier", [length], contractId);
   }
 
-  async get_manager_names(manager_address: string, contractId?: string) {
+  async getManagerNames(manager_address: string, contractId?: string) {
     return this.callView("get_manager_names", [manager_address], contractId);
   }
 
-  async get_manager_primary_name(manager_address: string, contractId?: string) {
+  async getManagerPrimaryName(manager_address: string, contractId?: string) {
     return this.callView("get_manager_primary_name", [manager_address], contractId);
   }
 
-  async get_fee_structure(contractId?: string) {
+  async getFeeStructure(contractId?: string) {
     return this.callView("get_fee_structure", [], contractId);
   }
 
-  async get_max_profile_data_entries(contractId?: string) {
+  async getMaxProfileDataEntries(contractId?: string) {
     return this.callView("get_max_profile_data_entries", [], contractId);
   }
 
-  async get_max_profile_key_length(contractId?: string) {
+  async getMaxProfileKeyLength(contractId?: string) {
     return this.callView("get_max_profile_key_length", [], contractId);
   }
 
-  async get_max_profile_value_length(contractId?: string) {
+  async getMaxProfileValueLength(contractId?: string) {
     return this.callView("get_max_profile_value_length", [], contractId);
   }
 
-  async get_max_token_symbol_length(contractId?: string) {
+  async getMaxTokenSymbolLength(contractId?: string) {
     return this.callView("get_max_token_symbol_length", [], contractId);
   }
 
-  async get_max_total_profile_size(contractId?: string) {
+  async getMaxTotalProfileSize(contractId?: string) {
     return this.callView("get_max_total_profile_size", [], contractId);
   }
 
-  async get_grace_period_days(contractId?: string) {
+  async getGracePeriodDays(contractId?: string) {
     return this.callView("get_grace_period_days", [], contractId);
   }
 

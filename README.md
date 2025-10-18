@@ -44,7 +44,7 @@ Here's how you can resolve a Thoth ID name to get its associated data:
 ```typescript
 async function resolveName(name: string) {
   try {
-    const nameData = await sdk.resolve_name(name);
+    const nameData = await sdk.resolveName(name);
     console.log(`Data for ${name}:`, nameData);
     return nameData;
   } catch (error) {
@@ -61,40 +61,39 @@ All methods return a `Promise` that resolves with the data from the smart contra
 
 ### Name Information
 
-- `is_name_available(name: string, contractId?: string)`: Checks if a name is available to be registered.
-- `resolve_name(name: string, contractId?: string)`: Resolves a name to its associated data.
-- `get_name_data(name: string, contractId?: string)`: Retrieves the raw data associated with a name.
-- `get_name_owner(name: string, contractId?: string)`: Gets the owner's address for a given name.
-- `get_name_expiration_info(name: string, contractId?: string)`: Gets expiration information for a name.
-- `get_name_expiration_date(name: string, contractId?: string)`: Gets the exact expiration date of a name.
-- `validate_name(name: string, contractId?: string)`: Validates the format of a name.
-- `check_name_ownership(name: string, address: string, contractId?: string)`: Checks if a given address owns a name.
-- `check_name_status(name: string, contractId?: string)`: Checks the current status of a name (e.g., active, expired).
+- `isNameAvailable(name: string, contractId?: string)`: Checks if a name is available to be registered.
+- `resolveName(name: string, contractId?: string)`: Resolves a name to its associated data.
+- `getNameData(name: string, contractId?: string)`: Retrieves the raw data associated with a name.
+- `getNameOwner(name: string, contractId?: string)`: Gets the owner's address for a given name.
+- `getNameExpirationInfo(name: string, contractId?: string)`: Gets expiration information for a name.
+- `getNameExpirationDate(name: string, contractId?: string)`: Gets the exact expiration date of a name.
+- `validateName(name: string, contractId?: string)`: Validates the format of a name.
+- `checkNameOwnership(name: string, address: string, contractId?: string)`: Checks if a given address owns a name.
+- `checkNameStatus(name: string, contractId?: string)`: Checks the current status of a name (e.g., active, expired).
 
 ### Fee Information
 
-- `get_fee_info(name: string, contractId?: string)`: Gets information about the fees for a name.
-- `calculate_fee(name: string, contractId?: string)`: Calculates the registration or renewal fee for a name.
-- `get_fee_multiplier(length: number, contractId?: string)`: Gets the fee multiplier for a name of a certain length.
-- `get_fee_structure(contractId?: string)`: Retrieves the entire fee structure of the contract.
+- `getFeeInfo(name: string, contractId?: string)`: Gets information about the fees for a name.
+- `calculateFee(name: string, contractId?: string)`: Calculates the registration or renewal fee for a name.
+- `getFeeMultiplier(length: number, contractId?: string)`: Gets the fee multiplier for a name of a certain length.
+- `getFeeStructure(contractId?: string)`: Retrieves the entire fee structure of the contract.
 
 ### Manager Information
 
-- `get_manager_names(manager_address: string, contractId?: string)`: Gets all names managed by a specific address.
-- `get_manager_primary_name(manager_address: string, contractId?: string)`: Gets the primary name set for a manager address.
+- `getManagerNames(manager_address: string, contractId?: string)`: Gets all names managed by a specific address.
+- `getManagerPrimaryName(manager_address: string, contractId?: string)`: Gets the primary name set for a manager address.
 
 ### Contract Configuration
 
-- `get_version(contractId?: string)`: Gets the version of the smart contract.
-- `get_dev_address(contractId?: string)`: Gets the developer address of the contract.
-- `get_contract_domain(contractId?: string)`: Gets the domain of the contract (e.g., `.hathor`).
-- `get_grace_period_days(contractId?: string)`: Gets the grace period for name renewals.
-- `get_max_profile_data_entries(contractId?: string)`: Gets the maximum number of data entries in a profile.
-- `get_max_profile_key_length(contractId?: string)`: Gets the maximum length of a profile data key.
-- `get_max_profile_value_length(contractId?: string)`: Gets the maximum length of a profile data value.
-- `get_max_token_symbol_length(contractId?: string)`: Gets the maximum length of a token symbol.
-- `get_max_total_profile_size(contractId?: string)`: Gets the maximum total size of a profile.
-- `validate_key_format(key: string, value: string, contractId?: string)`: Validates the format of a key-value pair for profile data.
+- `getDevAddress(contractId?: string)`: Gets the developer address of the contract.
+- `getContractDomain(contractId?: string)`: Gets the domain of the contract (e.g., `.hathor`).
+- `getGracePeriodDays(contractId?: string)`: Gets the grace period for name renewals.
+- `getMaxProfileDataEntries(contractId?: string)`: Gets the maximum number of data entries in a profile.
+- `getMaxProfileKeyLength(contractId?: string)`: Gets the maximum length of a profile data key.
+- `getMaxProfileValueLength(contractId?: string)`: Gets the maximum length of a profile data value.
+- `getMaxTokenSymbolLength(contractId?: string)`: Gets the maximum length of a token symbol.
+- `getMaxTotalProfileSize(contractId?: string)`: Gets the maximum total size of a profile.
+- `validateKeyFormat(key: string, value: string, contractId?: string)`: Validates the format of a key-value pair for profile data.
 
 ### Multiple Calls
 

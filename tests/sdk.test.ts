@@ -15,159 +15,159 @@ describe('ThothIdSDK', () => {
     sdk = new ThothIdSDK(sdkOptions);
   });
 
-  // Test for is_name_available
+  // Test for isNameAvailable
   it('should check if a name is available', async () => {
-    const isAvailable = await sdk.is_name_available(testData.availableName);
+    const isAvailable = await sdk.isNameAvailable(testData.availableName);
     expect(isAvailable).toBe(true);
 
-    const isNotAvailable = await sdk.is_name_available(testData.existingName);
+    const isNotAvailable = await sdk.isNameAvailable(testData.existingName);
     expect(isNotAvailable).toBe(false);
   }, 30000);
 
-  // Test for resolve_name
+  // Test for resolveName
   it('should resolve a name', async () => {
     // This test will fail until you provide the correct ownerAddress in test-config.json
-    const ownerAddress = await sdk.resolve_name(testData.existingName);
+    const ownerAddress = await sdk.resolveName(testData.existingName);
     expect(ownerAddress).toBe(testData.ownerAddress);
   }, 30000);
 
-  // Test for get_name_data
+  // Test for getNameData
   it('should get data for a name', async () => {
-    const nameData = await sdk.get_name_data(testData.existingName);
+    const nameData = await sdk.getNameData(testData.existingName);
     expect(nameData).toBeDefined();
   }, 30000);
 
-  // Test for get_name_owner
+  // Test for getNameOwner
   it('should get the owner of a name', async () => {
     // This test will fail until you provide the correct ownerAddress in test-config.json
-    const owner = await sdk.get_name_owner(testData.existingName);
+    const owner = await sdk.getNameOwner(testData.existingName);
     expect(owner).toBe(testData.ownerAddress);
   }, 30000);
 
-  // Test for get_name_expiration_info
+  // Test for getNameExpirationInfo
   it('should get expiration info for a name', async () => {
-    const expirationInfo = await sdk.get_name_expiration_info(testData.existingName);
+    const expirationInfo = await sdk.getNameExpirationInfo(testData.existingName);
     expect(expirationInfo).toBeDefined();
   }, 30000);
 
-  // Test for get_name_expiration_date
+  // Test for getNameExpirationDate
   it('should get the expiration date of a name', async () => {
-    const expirationDate = await sdk.get_name_expiration_date(testData.existingName);
+    const expirationDate = await sdk.getNameExpirationDate(testData.existingName);
     expect(expirationDate).toBeDefined();
   }, 30000);
 
-  // Test for validate_name
+  // Test for validateName
   it('should validate a name', async () => {
-    const isValid = await sdk.validate_name(testData.nameForValidation);
+    const isValid = await sdk.validateName(testData.nameForValidation);
     expect(isValid).toBe(true);
 
-    const isInvalid = await sdk.validate_name(testData.invalidNameForValidation);
+    const isInvalid = await sdk.validateName(testData.invalidNameForValidation);
     expect(isInvalid).toBe(false);
   }, 30000);
 
-  // Test for validate_key_format
+  // Test for validateKeyFormat
   it('should validate a key format', async () => {
-    const isValid = await sdk.validate_key_format('profile_website', 'https://example.com');
+    const isValid = await sdk.validateKeyFormat('profile_website', 'https://example.com');
     expect(isValid).toBe(true);
   }, 30000);
 
-  // Test for get_dev_address
+  // Test for getDevAddress
   it('should get the developer address', async () => {
-    const devAddress = await sdk.get_dev_address();
+    const devAddress = await sdk.getDevAddress();
     expect(devAddress).toBeDefined();
   }, 30000);
 
-  // Test for get_contract_domain
+  // Test for getContractDomain
   it('should get the contract domain', async () => {
-    const domain = await sdk.get_contract_domain();
+    const domain = await sdk.getContractDomain();
     expect(domain).toBeDefined();
   }, 30000);
 
-  // Test for check_name_ownership
+  // Test for checkNameOwnership
   it('should check name ownership', async () => {
     // This test will fail until you provide the correct ownerAddress in test-config.json
-    const isOwner = await sdk.check_name_ownership(testData.existingName, testData.ownerAddress);
+    const isOwner = await sdk.checkNameOwnership(testData.existingName, testData.ownerAddress);
     expect(isOwner).toBe(true);
   }, 30000);
 
-  // Test for check_name_status
+  // Test for checkNameStatus
   it('should check the status of a name', async () => {
-    const status = await sdk.check_name_status(testData.existingName);
+    const status = await sdk.checkNameStatus(testData.existingName);
     expect(status).toBeDefined();
   }, 30000);
 
-  // Test for get_fee_info
+  // Test for getFeeInfo
   it('should get fee info for a name', async () => {
-    const feeInfo = await sdk.get_fee_info(testData.nameForFeeCalculation);
+    const feeInfo = await sdk.getFeeInfo(testData.nameForFeeCalculation);
     expect(feeInfo).toBeDefined();
   }, 30000);
 
-  // Test for calculate_fee
+  // Test for calculateFee
   it('should calculate the fee for a name', async () => {
-    const fee = await sdk.calculate_fee(testData.nameForFeeCalculation);
+    const fee = await sdk.calculateFee(testData.nameForFeeCalculation);
     expect(fee).toBeDefined();
   }, 30000);
 
-  // Test for get_fee_multiplier
+  // Test for getFeeMultiplier
   it('should get the fee multiplier for a name length', async () => {
-    const multiplier = await sdk.get_fee_multiplier(5);
+    const multiplier = await sdk.getFeeMultiplier(5);
     expect(multiplier).toBeDefined();
   }, 30000);
 
-  // Test for get_manager_names
+  // Test for getManagerNames
   it('should get names for a manager', async () => {
     // This test will fail until you provide a managerAddress in test-config.json
-    const names = await sdk.get_manager_names(testData.managerAddress);
+    const names = await sdk.getManagerNames(testData.managerAddress);
     expect(names).toBeDefined();
     expect(Array.isArray(names)).toBe(true);
   }, 30000);
 
-  // Test for get_manager_primary_name
+  // Test for getManagerPrimaryName
   it('should get the primary name for a manager', async () => {
     // This test will fail until you provide a managerAddress in test-config.json
-    const primaryName = await sdk.get_manager_primary_name(testData.managerAddress);
+    const primaryName = await sdk.getManagerPrimaryName(testData.managerAddress);
     expect(primaryName).toBeDefined();
   }, 30000);
 
-  // Test for get_fee_structure
+  // Test for getFeeStructure
   it('should get the fee structure', async () => {
-    const feeStructure = await sdk.get_fee_structure();
+    const feeStructure = await sdk.getFeeStructure();
     expect(feeStructure).toBeDefined();
   }, 30000);
 
-  // Test for get_max_profile_data_entries
+  // Test for getMaxProfileDataEntries
   it('should get max profile data entries', async () => {
-    const maxEntries = await sdk.get_max_profile_data_entries();
+    const maxEntries = await sdk.getMaxProfileDataEntries();
     expect(typeof maxEntries).toBe('number');
   }, 30000);
 
-  // Test for get_max_profile_key_length
+  // Test for getMaxProfileKeyLength
   it('should get max profile key length', async () => {
-    const maxLength = await sdk.get_max_profile_key_length();
+    const maxLength = await sdk.getMaxProfileKeyLength();
     expect(typeof maxLength).toBe('number');
   }, 30000);
 
-  // Test for get_max_profile_value_length
+  // Test for getMaxProfileValueLength
   it('should get max profile value length', async () => {
-    const maxLength = await sdk.get_max_profile_value_length();
+    const maxLength = await sdk.getMaxProfileValueLength();
     expect(typeof maxLength).toBe('number');
   }, 30000);
 
-  // Test for get_max_token_symbol_length
+  // Test for getMaxTokenSymbolLength
   it('should get max token symbol length', async () => {
-    const maxLength = await sdk.get_max_token_symbol_length();
+    const maxLength = await sdk.getMaxTokenSymbolLength();
     expect(typeof maxLength).toBe('number');
   }, 30000);
 
-  // Test for get_max_total_profile_size
+  // Test for getMaxTotalProfileSize
   it('should get max total profile size', async () => {
-    const maxSize = await sdk.get_max_total_profile_size();
+    const maxSize = await sdk.getMaxTotalProfileSize();
     expect(typeof maxSize).toBe('number');
   }, 30000);
 
-  // Test for get_grace_period_days
+  // Test for getGracePeriodDays
   it('should get grace period days', async () => {
-    const gracePeriod = await sdk.get_grace_period_days();
+    const gracePeriod = await sdk.getGracePeriodDays();
     expect(typeof gracePeriod).toBe('number');
   }, 30000);
 
