@@ -2,30 +2,23 @@ import fetch from "cross-fetch";
 import { encode } from "bs58";
 
 export type ThothSDKOptions = {
-  host?: string;
-  nodePort?: number | string;
+  nodeUrl?: string;
   contractId?: string;
   timeoutMs?: number;
-  protocol?: "http" | "https";
 };
 
 export class ThothIdSDK {
-  host: string;
-  nodePort: number | string;
+  nodeUrl: string;
   contractId?: string;
   timeoutMs: number;
-  protocol: "http" | "https";
 
   constructor(opts: ThothSDKOptions = {}) {
-    this.host = opts.host ?? "node1.mainnet.hathor.network";
-    this.nodePort = opts.nodePort ?? 80;
+    this.nodeUrl = opts.nodeUrl ?? "https://node1.mainnet.hathor.network/";
     this.contractId = opts.contractId ?? "CONTRACT-ID-HERE";
     this.timeoutMs = opts.timeoutMs ?? 15000;
-    this.protocol = opts.protocol ?? "https";
   }
 
-  setHost(host: string) { this.host = host; }
-  setNodePort(port: number | string) { this.nodePort = port; }
+  setNodeUrl(url: string) { this.nodeUrl = url; }
   setContractId(id: string) { this.contractId = id; }
 
   // --- helper: serialize single arg to contract format ---
@@ -58,7 +51,8 @@ export class ThothIdSDK {
     if (!id) throw new Error("contractId is required (either pass in constructor or to callView).");
 
     const callStr = this.buildCallString(methodName, params);
-    const urlBase = `${this.protocol}://${this.host}:${this.nodePort}/v1a/nano_contract/state`;
+    const baseUrl = this.nodeUrl.endsWith('/') ? this.nodeUrl : `${this.nodeUrl}/`;
+    const urlBase = `${baseUrl}v1a/nano_contract/state`;
     // Build URL with repeated calls[] params (we'll send only one here, but code supports multiple)
     const url = `${urlBase}?id=${encodeURIComponent(id)}&calls[]=${encodeURIComponent(callStr)}`;
 
@@ -221,7 +215,8 @@ export class ThothIdSDK {
     if (!id) throw new Error("contractId is required (either pass in constructor or to callMultiple).");
 
     const callStrings = calls.map(c => this.buildCallString(c.method, c.params));
-    const urlBase = `${this.protocol}://${this.host}:${this.nodePort}/v1a/nano_contract/state?id=${encodeURIComponent(id)}`;
+    const baseUrl = this.nodeUrl.endsWith('/') ? this.nodeUrl : `${this.nodeUrl}/`;
+    const urlBase = `${baseUrl}v1a/nano_contract/state?id=${encodeURIComponent(id)}`;
     const queryParts = callStrings.map(cs => `calls[]=${encodeURIComponent(cs)}`);
     const url = `${urlBase}&${queryParts.join("&")}`;
 

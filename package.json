@@ -1,13 +1,14 @@
 {
-  "name": "thoth-id-sdk2",
-  "version": "0.0.1",
+  "name": "thoth-id-sdk",
+  "version": "0.0.2",
   "description": "SDK to consult @view methods of ThothNamer nanocontract",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest",
-    "test:verbose": "jest tests/sdk.verbose.test.ts --verbose"
+    "test": "jest tests/sdk.test.ts",
+    "test:verbose": "jest tests/sdk.verbose.test.ts",
+    "test:setup": "ts-node tests/setup.ts"
   },
   "keywords": ["thoth", "id", "sdk"],
   "author": "Jackal thoth-id",
@@ -21,6 +22,7 @@
     "jest": "^29.5.0",
     "ts-jest": "^29.1.0",
     "@types/jest": "^29.5.0",
-    "@types/bs58": "^4.0.4"
+    "@types/bs58": "^4.0.4",
+    "ts-node": "^10.9.1"
   }
 }
