@@ -1,15 +1,15 @@
 {
   "sdkOptions": {
-    "nodeUrl": "http://172.15.6.109:8080/",
-    "contractId": "000069d32c32b3bc2da63708f286edab96da1a469971cfc61d8c650d7f9f6cbf"
+    "nodeUrl": "http://192.168.2.105:8080/",
+    "contractId": "00003d8598b128852a132caac6b8db1424f2e2713f2a674fc5d53dad1e544cfb"
   },
   "testData": {
-    "existingName": "name0e5dff",
+    "existingName": "namea94324",
     "availableName": "testname2",
     "nameForFeeCalculation": "feecalc",
     "nameForValidation": "validname",
     "invalidNameForValidation": "Invalid-Name",
-    "ownerAddress": "WRqBSi5jc74P8tRo7CmgiGByA1eTzfMh7B",
-    "managerAddress": "WRqBSi5jc74P8tRo7CmgiGByA1eTzfMh7B"
+    "ownerAddress": "Wj5WktyishxGCfK6hZQYaniRZyiqMDzA3X",
+    "managerAddress": "Wj5WktyishxGCfK6hZQYaniRZyiqMDzA3X"
   }
 }
