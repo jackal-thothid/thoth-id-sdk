@@ -48,7 +48,7 @@ async function get_wallet_history(wallet_id: string, headless_api_key: string, h
 
 async function wait_new_block(wallet_id: string, headless_api_key: string, host: string, port: number) {
     let attempts = 0;
-    const max_attempts = 60;
+    const max_attempts = 30;
 
     while (attempts < max_attempts) {
         try {
