@@ -1,6 +1,6 @@
 {
   "name": "thoth-id-sdk",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "SDK to consult @view methods of ThothNamer nanocontract",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
