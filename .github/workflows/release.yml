@@ -1,0 +1,128 @@
+name: Release and Publish to npm
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  release:
+    name: Test, Build, and Publish
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Clone Thoth ID environment repository
+        run: git clone --branch thoth-master https://github.com/Thoth-Namesystem/thoth-id.git thoth-id-env
+
+      - name: Start Docker environment
+        run: |
+          cd thoth-id-env
+          docker compose up -d
+
+      - name: Wait for services to be ready
+        run: sleep 45
+
+      - name: Run setup and tests
+        run: |
+          for i in 1 2 3; do
+            echo "--- Starting Attempt $i of 3 ---"
+            # Run setup first
+            if ! npm run test:setup; then
+              echo "Test setup failed on attempt $i."
+              if [ $i -lt 3 ]; then
+                echo "Retrying in 30 seconds..."
+                sleep 30
+                continue # Go to the next iteration of the loop
+              else
+                echo "Test setup failed after 3 attempts."
+                exit 1 # Exit with failure
+              fi
+            fi
+
+            # If setup was successful, run tests
+            if npm test; then
+              echo "Tests passed on attempt $i."
+              exit 0 # Success, exit the entire step
+            fi
+
+            # If tests failed
+            if [ $i -lt 3 ]; then
+              echo "Tests failed on attempt $i. Retrying setup and tests in 30 seconds..."
+              sleep 30
+            else
+              echo "Tests failed after 3 attempts."
+              exit 1 # Exit with failure
+            fi
+          done
+
+      - name: Determine version bump and release condition
+        id: version_info
+        run: |
+          commit_message=$(git log -1 --pretty=%B)
+          should_release="false"
+          bump="patch" # Default bump, will only be used if should_release is true
+          if [[ "$commit_message" == *"[major]"* || "$commit_message" == *"[breaking change]"* ]]; then
+            bump="major"
+            should_release="true"
+          elif [[ "$commit_message" == *"[minor]"* || "$commit_message" == *"[feat]"* ]]; then
+            bump="minor"
+            should_release="true"
+          elif [[ "$commit_message" == *"[patch]"* ]]; then
+            bump="patch"
+            should_release="true"
+          fi
+
+          if [[ "$should_release" == "true" ]]; then
+            echo "Release keyword found. Bump type: $bump"
+          else
+            echo "No release keyword found. Skipping release steps."
+          fi
+
+          echo "bump=$bump" >> $GITHUB_OUTPUT
+          echo "should_release=$should_release" >> $GITHUB_OUTPUT
+
+      - name: Build project
+        if: steps.version_info.outputs.should_release == 'true'
+        run: npm run build
+
+      - name: Configure Git
+        if: steps.version_info.outputs.should_release == 'true'
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Bump version and create tag
+        if: steps.version_info.outputs.should_release == 'true'
+        id: bump_version
+        run: |
+          new_version=$(npm version ${{ steps.version_info.outputs.bump }} --no-git-tag-version)
+          echo "new_version=$new_version" >> $GITHUB_OUTPUT
+          git add package.json package-lock.json
+          git commit -m "chore(release): ${new_version}"
+          git tag ${new_version}
+
+      - name: Push changes back to main
+        if: steps.version_info.outputs.should_release == 'true'
+        run: git push && git push --tags
+
+      - name: Publish to npm
+        if: steps.version_info.outputs.should_release == 'true'
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
