@@ -1,6 +1,6 @@
 {
   "name": "thoth-id-sdk",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "SDK to consult @view methods of ThothNamer nanocontract",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,7 +10,11 @@
     "test:verbose": "jest tests/sdk.verbose.test.ts",
     "test:setup": "ts-node tests/setup.ts"
   },
-  "keywords": ["thoth", "id", "sdk"],
+  "keywords": [
+    "thoth",
+    "id",
+    "sdk"
+  ],
   "author": "Jackal thoth-id",
   "license": "MIT",
   "dependencies": {
