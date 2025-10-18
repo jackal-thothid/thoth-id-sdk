@@ -1,8 +1,6 @@
 {
   "sdkOptions": {
-    "host": "172.15.6.109",
-    "nodePort": 8080,
-    "protocol": "http",
+    "nodeUrl": "http://172.15.6.109:8080/",
     "contractId": "000069d32c32b3bc2da63708f286edab96da1a469971cfc61d8c650d7f9f6cbf"
   },
   "testData": {

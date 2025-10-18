@@ -22,18 +22,17 @@ yarn add thoth-id-sdk
 
 ## Getting Started
 
-First, import and instantiate the SDK. You can connect to the Hathor mainnet or a testnet by specifying the `host` and `nodePort`.
+First, import and instantiate the SDK. You can connect to the Hathor mainnet or a testnet by specifying the `nodeUrl`.
 
 ```typescript
 import { ThothIdSDK } from "thoth-id-sdk";
 
-// Connect to mainnet
+// Connect to mainnet by using the default nodeUrl
 const sdk = new ThothIdSDK();
 
 // Or connect to a testnet/local node
 const testnetSDK = new ThothIdSDK({
-  host: "node1.testnet.hathor.network",
-  nodePort: 80,
+  nodeUrl: "https://node1.testnet.hathor.network/",
   contractId: "CONTRACT-ID-HERE" // Replace with your testnet contract ID
 });
 ```

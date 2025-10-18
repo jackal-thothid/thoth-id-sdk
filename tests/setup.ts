@@ -73,10 +73,12 @@ async function setup() {
         console.log('\nGenerated random master_wallet_id:', master_wallet_id);
         console.log('Generated random existingName:', existing_name);
 
-        // Update test-config.json with node host and port
-        test_config.sdkOptions.host = env_config.node_wallet_host;
-        test_config.sdkOptions.nodePort = env_config.node_wallet_port;
-        console.log('Updating test-config.json with node host and port:', env_config.node_wallet_host, env_config.node_wallet_port);
+        // Update test-config.json with node url
+        const nodeUrl = `http://${env_config.node_wallet_host}:${env_config.node_wallet_port}/`;
+        test_config.sdkOptions = {
+            nodeUrl: nodeUrl
+        };
+        console.log('Updating test-config.json with nodeUrl:', nodeUrl);
 
         await start_master_wallet(env_config);
 
