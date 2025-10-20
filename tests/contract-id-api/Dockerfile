@@ -11,9 +11,11 @@ COPY package*.json ./
 RUN npm install
 
 # Bundle app source
-COPY . .
+COPY index.ts .
+COPY contracts.json .
+COPY tsconfig.json .
 
-# Make port 3000 available to the world outside this container
+# Make port 3232 available to the world outside this container
 EXPOSE 3232
 
 # Define the command to run the app

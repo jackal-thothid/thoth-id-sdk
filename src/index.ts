@@ -27,7 +27,7 @@ export class ThothIdSDK {
       this.contractApiUrl = opts.contractApiUrl;
     } else {
       const useSsl = opts.useSsl ?? true;
-      this.contractApiUrl = `${useSsl ? 'https' : 'http'}://domains.thoth.id`;
+      this.contractApiUrl = `${useSsl ? 'https' : 'http'}://domains.thoth.id/contract-ids`;
     }
   }
 
