@@ -23,10 +23,15 @@ jobs:
       - name: Clone Thoth ID environment repository
         run: git clone --branch thoth-master https://github.com/Thoth-Namesystem/thoth-id.git thoth-id-env
 
-      - name: Start Docker environment
+      - name: Start Contract ID API
+        run: |
+          cd tests/contract-id-api
+          docker compose -f docker-compose.contract-id-api.yml up -d
+
+      - name: Start Thoth ID Environment
         run: |
           cd thoth-id-env
-          docker compose -f docker-compose.yml -f ../tests/contract-id-api/docker-compose.contract-id-api.yml up -d
+          docker compose up -d
 
       - name: Wait for services to be ready
         run: sleep 45
