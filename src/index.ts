@@ -159,14 +159,16 @@ export class ThothIdSDK {
 
   async isNameAvailable(name: string) {
     const finalContractId = this._getContractId(name);
+    const nameWithoutSuffix = name.split('.').slice(0, -1).join('.');
     const now_timestamp = Math.floor(Date.now() / 1000);
-    return this.callView("is_name_available", [name, now_timestamp], finalContractId, schemas.IsNameAvailableResponseSchema);
+    return this.callView("is_name_available", [nameWithoutSuffix, now_timestamp], finalContractId, schemas.IsNameAvailableResponseSchema);
   }
 
   async resolveName(name: string) {
     const finalContractId = this._getContractId(name);
+    const nameWithoutSuffix = name.split('.').slice(0, -1).join('.');
     const now_timestamp = Math.floor(Date.now() / 1000);
-    const hexAddress = await this.callView("resolve_name", [name, now_timestamp], finalContractId, schemas.ResolveNameResponseSchema);
+    const hexAddress = await this.callView("resolve_name", [nameWithoutSuffix, now_timestamp], finalContractId, schemas.ResolveNameResponseSchema);
     if (typeof hexAddress === 'string' && /^[0-9a-fA-F]+$/.test(hexAddress)) {
         const buffer = Buffer.from(hexAddress, 'hex');
         return encode(buffer);
@@ -176,12 +178,14 @@ export class ThothIdSDK {
 
   async getNameData(name: string) {
     const finalContractId = this._getContractId(name);
-    return this.callView("get_name_data", [name], finalContractId, schemas.GetNameDataResponseSchema);
+    const nameWithoutSuffix = name.split('.').slice(0, -1).join('.');
+    return this.callView("get_name_data", [nameWithoutSuffix], finalContractId, schemas.GetNameDataResponseSchema);
   }
 
   async getNameOwner(name: string) {
     const finalContractId = this._getContractId(name);
-    const hexAddress = await this.callView("get_name_owner", [name], finalContractId, schemas.GetNameOwnerResponseSchema);
+    const nameWithoutSuffix = name.split('.').slice(0, -1).join('.');
+    const hexAddress = await this.callView("get_name_owner", [nameWithoutSuffix], finalContractId, schemas.GetNameOwnerResponseSchema);
     if (typeof hexAddress === 'string' && /^[0-9a-fA-F]+$/.test(hexAddress)) {
         const buffer = Buffer.from(hexAddress, 'hex');
         return encode(buffer);
@@ -191,40 +195,47 @@ export class ThothIdSDK {
 
   async getNameExpirationInfo(name: string) {
     const finalContractId = this._getContractId(name);
+    const nameWithoutSuffix = name.split('.').slice(0, -1).join('.');
     const now_timestamp = Math.floor(Date.now() / 1000);
-    return this.callView("get_name_expiration_info", [name, now_timestamp], finalContractId, schemas.GetNameExpirationInfoResponseSchema);
+    return this.callView("get_name_expiration_info", [nameWithoutSuffix, now_timestamp], finalContractId, schemas.GetNameExpirationInfoResponseSchema);
   }
 
   async getNameExpirationDate(name: string) {
     const finalContractId = this._getContractId(name);
-    return this.callView("get_name_expiration_date", [name], finalContractId, schemas.GetNameExpirationDateResponseSchema);
+    const nameWithoutSuffix = name.split('.').slice(0, -1).join('.');
+    return this.callView("get_name_expiration_date", [nameWithoutSuffix], finalContractId, schemas.GetNameExpirationDateResponseSchema);
   }
 
   async validateName(name: string) {
     const finalContractId = this._getContractId(name);
-    return this.callView("validate_name", [name], finalContractId, schemas.ValidateNameResponseSchema);
+    const nameWithoutSuffix = name.split('.').slice(0, -1).join('.');
+    return this.callView("validate_name", [nameWithoutSuffix], finalContractId, schemas.ValidateNameResponseSchema);
   }
 
   async checkNameOwnership(name: string, address: string) {
     const finalContractId = this._getContractId(name);
+    const nameWithoutSuffix = name.split('.').slice(0, -1).join('.');
     const now_timestamp = Math.floor(Date.now() / 1000);
-    return this.callView("check_name_ownership", [name, address, now_timestamp], finalContractId, schemas.CheckNameOwnershipResponseSchema);
+    return this.callView("check_name_ownership", [nameWithoutSuffix, address, now_timestamp], finalContractId, schemas.CheckNameOwnershipResponseSchema);
   }
 
   async checkNameStatus(name: string) {
     const finalContractId = this._getContractId(name);
+    const nameWithoutSuffix = name.split('.').slice(0, -1).join('.');
     const now_timestamp = Math.floor(Date.now() / 1000);
-    return this.callView("check_name_status", [name, now_timestamp], finalContractId, schemas.CheckNameStatusResponseSchema);
+    return this.callView("check_name_status", [nameWithoutSuffix, now_timestamp], finalContractId, schemas.CheckNameStatusResponseSchema);
   }
 
   async getFeeInfo(name: string) {
     const finalContractId = this._getContractId(name);
-    return this.callView("get_fee_info", [name], finalContractId, schemas.GetFeeInfoResponseSchema);
+    const nameWithoutSuffix = name.split('.').slice(0, -1).join('.');
+    return this.callView("get_fee_info", [nameWithoutSuffix], finalContractId, schemas.GetFeeInfoResponseSchema);
   }
 
   async calculateFee(name: string) {
     const finalContractId = this._getContractId(name);
-    return this.callView("calculate_fee", [name], finalContractId, schemas.CalculateFeeResponseSchema);
+    const nameWithoutSuffix = name.split('.').slice(0, -1).join('.');
+    return this.callView("calculate_fee", [nameWithoutSuffix], finalContractId, schemas.CalculateFeeResponseSchema);
   }
 
   private _getContractIdFromSuffix(suffix: string): string {
