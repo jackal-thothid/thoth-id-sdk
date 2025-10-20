@@ -205,6 +205,28 @@ export class ThothIdSDK {
     return this.callView("validate_name", [name], finalContractId, schemas.ValidateNameResponseSchema);
   }
 
+  async checkNameOwnership(name: string, address: string) {
+    const finalContractId = this._getContractId(name);
+    const now_timestamp = Math.floor(Date.now() / 1000);
+    return this.callView("check_name_ownership", [name, address, now_timestamp], finalContractId, schemas.CheckNameOwnershipResponseSchema);
+  }
+
+  async checkNameStatus(name: string) {
+    const finalContractId = this._getContractId(name);
+    const now_timestamp = Math.floor(Date.now() / 1000);
+    return this.callView("check_name_status", [name, now_timestamp], finalContractId, schemas.CheckNameStatusResponseSchema);
+  }
+
+  async getFeeInfo(name: string) {
+    const finalContractId = this._getContractId(name);
+    return this.callView("get_fee_info", [name], finalContractId, schemas.GetFeeInfoResponseSchema);
+  }
+
+  async calculateFee(name: string) {
+    const finalContractId = this._getContractId(name);
+    return this.callView("calculate_fee", [name], finalContractId, schemas.CalculateFeeResponseSchema);
+  }
+
   private _getContractIdFromSuffix(suffix: string): string {
     // 1. Use the contractId from the SDK options (for testing)
     if (this.contractId) {
