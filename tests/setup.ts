@@ -309,6 +309,8 @@ async function create_name(env_config: any, test_config: any, contract_id: strin
         master_id
     } = env_config;
 
+    const nameWithoutSuffix = test_config.testData.existingName.split('.').slice(0, -1).join('.');
+
     const url = `http://${master_wallet_host}:${master_wallet_port}/wallet/nano-contracts/execute`;
     const body = {
         "nc_id": contract_id,
@@ -323,7 +325,7 @@ async function create_name(env_config: any, test_config: any, contract_id: strin
                 }
             ],
             "args": [
-                test_config.testData.existingName,
+                nameWithoutSuffix,
                 crypto.randomBytes(3).toString('hex').slice(0, 5)
             ]
         }
