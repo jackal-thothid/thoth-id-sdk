@@ -82,19 +82,14 @@ async function setup() {
         // Generate random names
         const random_hex = crypto.randomBytes(3).toString('hex');
         const master_wallet_id = `master_wallet_id_${random_hex}`;
-        const domains = [
-            random_string(3, 'abcdefghijklmnopqrstuvwxyz'), 
-            random_string(3, 'abcdefghijklmnopqrstuvwxyz'), 
-            random_string(3, 'abcdefghijklmnopqrstuvwxyz')
-        ];
-        const existing_name = `name${random_hex}.${domains[0]}`; // Use the first random domain
+        const domains = ['htr', 'dzr', 'hop'];
+        const existing_name = `name${random_hex}.${domains[0]}`; // Use the first domain
 
         // Update configs with random names
         env_config.master_id = master_wallet_id;
         test_config.testData.existingName = existing_name;
         console.log('\nGenerated random master_wallet_id:', master_wallet_id);
         console.log('Generated random existingName:', existing_name);
-        console.log('Generated random domains:', domains);
 
         // Update test-config.json with node url and contract api url
         const nodeUrl = `http://${env_config.node_wallet_host}:${env_config.node_wallet_port}/`;

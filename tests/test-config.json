@@ -5,10 +5,10 @@
     "useSsl": false
   },
   "testData": {
-    "existingName": "",
-    "availableName": "testname2",
-    "nameForFeeCalculation": "feecalc",
-    "nameForValidation": "validname",
+    "existingName": "name.htr",
+    "availableName": "testname2.htr",
+    "nameForFeeCalculation": "feecalc.htr",
+    "nameForValidation": "validname.htr",
     "invalidNameForValidation": "Invalid-Name",
     "ownerAddress": "",
     "managerAddress": ""
