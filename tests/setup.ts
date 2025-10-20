@@ -82,20 +82,29 @@ async function setup() {
         // Generate random names
         const random_hex = crypto.randomBytes(3).toString('hex');
         const master_wallet_id = `master_wallet_id_${random_hex}`;
-        const existing_name = `name${random_hex}`;
+        const domains = [
+            random_string(3, 'abcdefghijklmnopqrstuvwxyz'), 
+            random_string(3, 'abcdefghijklmnopqrstuvwxyz'), 
+            random_string(3, 'abcdefghijklmnopqrstuvwxyz')
+        ];
+        const existing_name = `name${random_hex}.${domains[0]}`; // Use the first random domain
 
         // Update configs with random names
         env_config.master_id = master_wallet_id;
         test_config.testData.existingName = existing_name;
         console.log('\nGenerated random master_wallet_id:', master_wallet_id);
         console.log('Generated random existingName:', existing_name);
+        console.log('Generated random domains:', domains);
 
-        // Update test-config.json with node url
+        // Update test-config.json with node url and contract api url
         const nodeUrl = `http://${env_config.node_wallet_host}:${env_config.node_wallet_port}/`;
         test_config.sdkOptions = {
-            nodeUrl: nodeUrl
+            nodeUrl: nodeUrl,
+            contractApiUrl: 'http://localhost:3232/contract-ids',
+            useSsl: false,
         };
         console.log('Updating test-config.json with nodeUrl:', nodeUrl);
+        console.log('Updating test-config.json with contractApiUrl:', test_config.sdkOptions.contractApiUrl);
 
         await start_master_wallet(env_config);
 
@@ -112,12 +121,17 @@ async function setup() {
         console.log('\nWaiting 5 seconds...');
         await new Promise(resolve => setTimeout(resolve, 5000));
 
-        const create_contract_response = await create_nano_contract(env_config, address_master);
-        
-        const contract_id = create_contract_response.hash;
-        // Update test-config.json with the new contract_id
-        test_config.sdkOptions.contractId = contract_id;
-        console.log('Updating test-config.json with new contract_id:', contract_id);
+        const contractIds: Record<string, string> = {};
+
+        for (const domain of domains) {
+            console.log(`--- Creating contract for ${domain} ---`);
+            const create_contract_response = await create_nano_contract(env_config, address_master);
+            const contract_id = create_contract_response.hash;
+            contractIds[domain] = contract_id;
+            console.log(`Updating contract-id-api with ${domain}: ${contract_id}`);
+            await updateContractIdApi(domain, contract_id);
+            await wait_new_block(env_config.master_id, env_config.headless_api_key, env_config.master_wallet_host, env_config.master_wallet_port);
+        }
 
         write_config('test-env.json', env_config);
         write_config('test-config.json', test_config);
@@ -126,7 +140,7 @@ async function setup() {
         console.log('\nWaiting 5 seconds...');
         await wait_new_block(env_config.master_id, env_config.headless_api_key, env_config.master_wallet_host, env_config.master_wallet_port);
 
-        await create_name(env_config, test_config, contract_id, address_master);
+        await create_name(env_config, test_config, contractIds[domains[0]], address_master);
         await wait_new_block(env_config.master_id, env_config.headless_api_key, env_config.master_wallet_host, env_config.master_wallet_port);
 
         console.log('\nSetup completed successfully.');
@@ -135,6 +149,25 @@ async function setup() {
         console.error('Error during setup:', error);
         process.exit(1);
     }
+}
+
+async function updateContractIdApi(key: string, value: string) {
+    console.log(`\n--- Updating Contract ID API for ${key} ---`);
+    const url = 'http://localhost:3232/contract-id';
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ key, value })
+    });
+
+    if (!response.ok) {
+        const error_text = await response.text();
+        throw new Error(`Failed to update contract ID API: ${response.status} ${response.statusText} - ${error_text}`);
+    }
+
+    console.log(`Contract ID API updated successfully for ${key}.`);
 }
 
 async function start_master_wallet(config: any) {

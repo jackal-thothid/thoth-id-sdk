@@ -5,19 +5,57 @@ import * as schemas from "./schemas";
 
 export type ThothSDKOptions = {
   nodeUrl?: string;
-  contractId?: string;
+  contractId?: string | null;
+  contractApiUrl?: string;
+  useSsl?: boolean;
   timeoutMs?: number;
 };
 
 export class ThothIdSDK {
   nodeUrl: string;
-  contractId?: string;
+  contractId?: string | null;
+  contractApiUrl?: string;
+  contractIds: Record<string, string> = {};
   timeoutMs: number;
 
   constructor(opts: ThothSDKOptions = {}) {
     this.nodeUrl = opts.nodeUrl ?? "https://node1.mainnet.hathor.network/";
-    this.contractId = opts.contractId ?? "CONTRACT-ID-HERE";
+    this.contractId = opts.contractId ?? null;
     this.timeoutMs = opts.timeoutMs ?? 15000;
+
+    if (opts.contractApiUrl) {
+      this.contractApiUrl = opts.contractApiUrl;
+    } else {
+      const useSsl = opts.useSsl ?? true;
+      this.contractApiUrl = `${useSsl ? 'https' : 'http'}://domains.thoth.id`;
+    }
+  }
+
+  async loadContractIds(url?: string): Promise<void> {
+    const targetUrl = url ?? this.contractApiUrl;
+    if (!targetUrl) {
+      return;
+    }
+
+    try {
+      const response = await fetch(targetUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch contract IDs: ${response.statusText}`);
+      }
+      this.contractIds = await response.json();
+    } catch (error) {
+      console.error("Error loading contract IDs:", error);
+      throw error;
+    }
+  }
+
+  private getContractIdForName(name: string): string | undefined {
+    const parts = name.split('.');
+    if (parts.length < 2) {
+      return undefined;
+    }
+    const suffix = parts[parts.length - 1];
+    return this.contractIds[suffix];
   }
 
   setNodeUrl(url: string) { this.nodeUrl = url; }
@@ -105,14 +143,30 @@ export class ThothIdSDK {
     }
   }
 
-  async isNameAvailable(name: string, contractId?: string) {
-    const now_timestamp = Math.floor(Date.now() / 1000);
-    return this.callView("is_name_available", [name, now_timestamp], contractId, schemas.IsNameAvailableResponseSchema);
+  private _getContractId(name: string): string {
+    // 1. Use the contractId from the SDK options (for testing)
+    if (this.contractId) {
+      return this.contractId;
+    }
+    // 2. Resolve the contractId from the name suffix
+    const fromName = this.getContractIdForName(name);
+    if (fromName) {
+      return fromName;
+    }
+    // 3. If all else fails, throw an error
+    throw new Error(`Could not determine contract ID for name "${name}". No contractId was provided and the suffix does not match a known contract.`);
   }
 
-  async resolveName(name: string, contractId?: string) {
+  async isNameAvailable(name: string) {
+    const finalContractId = this._getContractId(name);
     const now_timestamp = Math.floor(Date.now() / 1000);
-    const hexAddress = await this.callView("resolve_name", [name, now_timestamp], contractId, schemas.ResolveNameResponseSchema);
+    return this.callView("is_name_available", [name, now_timestamp], finalContractId, schemas.IsNameAvailableResponseSchema);
+  }
+
+  async resolveName(name: string) {
+    const finalContractId = this._getContractId(name);
+    const now_timestamp = Math.floor(Date.now() / 1000);
+    const hexAddress = await this.callView("resolve_name", [name, now_timestamp], finalContractId, schemas.ResolveNameResponseSchema);
     if (typeof hexAddress === 'string' && /^[0-9a-fA-F]+$/.test(hexAddress)) {
         const buffer = Buffer.from(hexAddress, 'hex');
         return encode(buffer);
@@ -120,12 +174,14 @@ export class ThothIdSDK {
     return hexAddress;
   }
 
-  async getNameData(name: string, contractId?: string) {
-    return this.callView("get_name_data", [name], contractId, schemas.GetNameDataResponseSchema);
+  async getNameData(name: string) {
+    const finalContractId = this._getContractId(name);
+    return this.callView("get_name_data", [name], finalContractId, schemas.GetNameDataResponseSchema);
   }
 
-  async getNameOwner(name: string, contractId?: string) {
-    const hexAddress = await this.callView("get_name_owner", [name], contractId, schemas.GetNameOwnerResponseSchema);
+  async getNameOwner(name: string) {
+    const finalContractId = this._getContractId(name);
+    const hexAddress = await this.callView("get_name_owner", [name], finalContractId, schemas.GetNameOwnerResponseSchema);
     if (typeof hexAddress === 'string' && /^[0-9a-fA-F]+$/.test(hexAddress)) {
         const buffer = Buffer.from(hexAddress, 'hex');
         return encode(buffer);
@@ -133,91 +189,104 @@ export class ThothIdSDK {
     return hexAddress;
   }
 
-  async getNameExpirationInfo(name: string, contractId?: string) {
+  async getNameExpirationInfo(name: string) {
+    const finalContractId = this._getContractId(name);
     const now_timestamp = Math.floor(Date.now() / 1000);
-    return this.callView("get_name_expiration_info", [name, now_timestamp], contractId, schemas.GetNameExpirationInfoResponseSchema);
+    return this.callView("get_name_expiration_info", [name, now_timestamp], finalContractId, schemas.GetNameExpirationInfoResponseSchema);
   }
 
-  async getNameExpirationDate(name: string, contractId?: string) {
-    return this.callView("get_name_expiration_date", [name], contractId, schemas.GetNameExpirationDateResponseSchema);
+  async getNameExpirationDate(name: string) {
+    const finalContractId = this._getContractId(name);
+    return this.callView("get_name_expiration_date", [name], finalContractId, schemas.GetNameExpirationDateResponseSchema);
   }
 
-  async validateName(name: string, contractId?: string) {
-    return this.callView("validate_name", [name], contractId, schemas.ValidateNameResponseSchema);
+  async validateName(name: string) {
+    const finalContractId = this._getContractId(name);
+    return this.callView("validate_name", [name], finalContractId, schemas.ValidateNameResponseSchema);
   }
 
-  async validateKeyFormat(key: string, value: string, contractId?: string) {
-    return this.callView("validate_key_format", [key, value], contractId, schemas.ValidateKeyFormatResponseSchema);
+  private _getContractIdFromSuffix(suffix: string): string {
+    // 1. Use the contractId from the SDK options (for testing)
+    if (this.contractId) {
+      return this.contractId;
+    }
+    // 2. Resolve the contractId from the suffix
+    const fromSuffix = this.contractIds[suffix];
+    if (fromSuffix) {
+      return fromSuffix;
+    }
+    // 3. If all else fails, throw an error
+    throw new Error(`Could not determine contract ID for suffix "${suffix}".`);
   }
 
-  async getDevAddress(contractId?: string) {
-    return this.callView("get_dev_address", [], contractId, schemas.GetDevAddressResponseSchema);
+  async validateKeyFormat(key: string, value: string, domainSuffix: string) {
+    const finalContractId = this._getContractIdFromSuffix(domainSuffix);
+    return this.callView("validate_key_format", [key, value], finalContractId, schemas.ValidateKeyFormatResponseSchema);
   }
 
-  async getContractDomain(contractId?: string) {
-    return this.callView("get_contract_domain", [], contractId, schemas.GetContractDomainResponseSchema);
+  async getDevAddress(domainSuffix: string) {
+    const finalContractId = this._getContractIdFromSuffix(domainSuffix);
+    return this.callView("get_dev_address", [], finalContractId, schemas.GetDevAddressResponseSchema);
   }
 
-  async checkNameOwnership(name: string, address: string, contractId?: string) {
-    const now_timestamp = Math.floor(Date.now() / 1000);
-    return this.callView("check_name_ownership", [name, address, now_timestamp], contractId, schemas.CheckNameOwnershipResponseSchema);
+  async getContractDomain(domainSuffix: string) {
+    const finalContractId = this._getContractIdFromSuffix(domainSuffix);
+    return this.callView("get_contract_domain", [], finalContractId, schemas.GetContractDomainResponseSchema);
   }
 
-  async checkNameStatus(name: string, contractId?: string) {
-    const now_timestamp = Math.floor(Date.now() / 1000);
-    return this.callView("check_name_status", [name, now_timestamp], contractId, schemas.CheckNameStatusResponseSchema);
+  async getFeeMultiplier(length: number, domainSuffix: string) {
+    const finalContractId = this._getContractIdFromSuffix(domainSuffix);
+    return this.callView("get_fee_multiplier", [length], finalContractId, schemas.GetFeeMultiplierResponseSchema);
   }
 
-  async getFeeInfo(name: string, contractId?: string) {
-    return this.callView("get_fee_info", [name], contractId, schemas.GetFeeInfoResponseSchema);
+  async getManagerNames(manager_address: string, domainSuffix: string) {
+    const finalContractId = this._getContractIdFromSuffix(domainSuffix);
+    return this.callView("get_manager_names", [manager_address], finalContractId, schemas.GetManagerNamesResponseSchema);
   }
 
-  async calculateFee(name: string, contractId?: string) {
-    return this.callView("calculate_fee", [name], contractId, schemas.CalculateFeeResponseSchema);
+  async getManagerPrimaryName(manager_address: string, domainSuffix: string) {
+    const finalContractId = this._getContractIdFromSuffix(domainSuffix);
+    return this.callView("get_manager_primary_name", [manager_address], finalContractId, schemas.GetManagerPrimaryNameResponseSchema);
   }
 
-  async getFeeMultiplier(length: number, contractId?: string) {
-    return this.callView("get_fee_multiplier", [length], contractId, schemas.GetFeeMultiplierResponseSchema);
+  async getFeeStructure(domainSuffix: string) {
+    const finalContractId = this._getContractIdFromSuffix(domainSuffix);
+    return this.callView("get_fee_structure", [], finalContractId, schemas.GetFeeStructureResponseSchema);
   }
 
-  async getManagerNames(manager_address: string, contractId?: string) {
-    return this.callView("get_manager_names", [manager_address], contractId, schemas.GetManagerNamesResponseSchema);
+  async getMaxProfileDataEntries(domainSuffix: string) {
+    const finalContractId = this._getContractIdFromSuffix(domainSuffix);
+    return this.callView("get_max_profile_data_entries", [], finalContractId, schemas.GetMaxProfileDataEntriesResponseSchema);
   }
 
-  async getManagerPrimaryName(manager_address: string, contractId?: string) {
-    return this.callView("get_manager_primary_name", [manager_address], contractId, schemas.GetManagerPrimaryNameResponseSchema);
+  async getMaxProfileKeyLength(domainSuffix: string) {
+    const finalContractId = this._getContractIdFromSuffix(domainSuffix);
+    return this.callView("get_max_profile_key_length", [], finalContractId, schemas.GetMaxProfileKeyLengthResponseSchema);
   }
 
-  async getFeeStructure(contractId?: string) {
-    return this.callView("get_fee_structure", [], contractId, schemas.GetFeeStructureResponseSchema);
+  async getMaxProfileValueLength(domainSuffix: string) {
+    const finalContractId = this._getContractIdFromSuffix(domainSuffix);
+    return this.callView("get_max_profile_value_length", [], finalContractId, schemas.GetMaxProfileValueLengthResponseSchema);
   }
 
-  async getMaxProfileDataEntries(contractId?: string) {
-    return this.callView("get_max_profile_data_entries", [], contractId, schemas.GetMaxProfileDataEntriesResponseSchema);
+  async getMaxTokenSymbolLength(domainSuffix: string) {
+    const finalContractId = this._getContractIdFromSuffix(domainSuffix);
+    return this.callView("get_max_token_symbol_length", [], finalContractId, schemas.GetMaxTokenSymbolLengthResponseSchema);
   }
 
-  async getMaxProfileKeyLength(contractId?: string) {
-    return this.callView("get_max_profile_key_length", [], contractId, schemas.GetMaxProfileKeyLengthResponseSchema);
+  async getMaxTotalProfileSize(domainSuffix: string) {
+    const finalContractId = this._getContractIdFromSuffix(domainSuffix);
+    return this.callView("get_max_total_profile_size", [], finalContractId, schemas.GetMaxTotalProfileSizeResponseSchema);
   }
 
-  async getMaxProfileValueLength(contractId?: string) {
-    return this.callView("get_max_profile_value_length", [], contractId, schemas.GetMaxProfileValueLengthResponseSchema);
+  async getGracePeriodDays(domainSuffix: string) {
+    const finalContractId = this._getContractIdFromSuffix(domainSuffix);
+    return this.callView("get_grace_period_days", [], finalContractId, schemas.GetGracePeriodDaysResponseSchema);
   }
 
-  async getMaxTokenSymbolLength(contractId?: string) {
-    return this.callView("get_max_token_symbol_length", [], contractId, schemas.GetMaxTokenSymbolLengthResponseSchema);
-  }
-
-  async getMaxTotalProfileSize(contractId?: string) {
-    return this.callView("get_max_total_profile_size", [], contractId, schemas.GetMaxTotalProfileSizeResponseSchema);
-  }
-
-  async getGracePeriodDays(contractId?: string) {
-    return this.callView("get_grace_period_days", [], contractId, schemas.GetGracePeriodDaysResponseSchema);
-  }
-
-  async callMultiple(calls: { method: string; params?: any[] }[], contractId?: string): Promise<any[]> {
-    const id = contractId ?? this.contractId;
+  async callMultiple(calls: { method: string; params?: any[] }[], domainSuffix: string): Promise<any[]> {
+    const finalContractId = this._getContractIdFromSuffix(domainSuffix);
+    const id = finalContractId;
     if (!id) throw new Error("contractId is required.");
 
     const callStrings = calls.map(c => this.buildCallString(c.method, c.params));
