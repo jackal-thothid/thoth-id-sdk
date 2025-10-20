@@ -1,0 +1,65 @@
+name: Reusable Test Suite
+
+on:
+  workflow_call:
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Clone Thoth ID environment repository
+        run: git clone --branch thoth-master https://github.com/Thoth-Namesystem/thoth-id.git thoth-id-env
+
+      - name: Start Contract ID API
+        run: |
+          cd tests/contract-id-api
+          docker compose -f docker-compose.contract-id-api.yml up -d
+
+      - name: Start Thoth ID Environment
+        run: |
+          cd thoth-id-env
+          docker compose up -d
+
+      - name: Wait for services to be ready
+        run: sleep 45
+
+      - name: Run setup and tests with retries
+        run: |
+          for i in 1 2 3; do
+            echo "--- Starting Attempt $i of 3 ---"
+            if ! npm run test:setup; then
+              echo "Test setup failed on attempt $i."
+              if [ $i -lt 3 ]; then
+                echo "Retrying in 30 seconds..."
+                sleep 30
+                continue
+              else
+                echo "Test setup failed after 3 attempts."
+                exit 1
+              fi
+            fi
+            if npm test; then
+              echo "Tests passed on attempt $i."
+              exit 0
+            fi
+            if [ $i -lt 3 ]; then
+              echo "Tests failed on attempt $i. Retrying setup and tests in 30 seconds..."
+              sleep 30
+            else
+              echo "Tests failed after 3 attempts."
+              exit 1
+            fi
+          done

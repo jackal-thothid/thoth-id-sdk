@@ -1,15 +1,16 @@
 {
   "sdkOptions": {
-    "nodeUrl": "http://192.168.2.105:8080/",
-    "contractId": "00003d8598b128852a132caac6b8db1424f2e2713f2a674fc5d53dad1e544cfb"
+    "nodeUrl": "",
+    "contractApiUrl": "http://localhost:3232/contract-ids",
+    "useSsl": false
   },
   "testData": {
-    "existingName": "namea94324",
-    "availableName": "testname2",
-    "nameForFeeCalculation": "feecalc",
-    "nameForValidation": "validname",
+    "existingName": "name.htr",
+    "availableName": "testname2.htr",
+    "nameForFeeCalculation": "feecalc.htr",
+    "nameForValidation": "validname.htr",
     "invalidNameForValidation": "Invalid-Name",
-    "ownerAddress": "Wj5WktyishxGCfK6hZQYaniRZyiqMDzA3X",
-    "managerAddress": "Wj5WktyishxGCfK6hZQYaniRZyiqMDzA3X"
+    "ownerAddress": "",
+    "managerAddress": ""
   }
 }

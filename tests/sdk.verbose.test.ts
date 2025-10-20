@@ -10,9 +10,12 @@ const testData = config.testData;
 
 describe('ThothIdSDK', () => {
   let sdk: ThothIdSDK;
+  let domainSuffix: string;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     sdk = new ThothIdSDK(sdkOptions);
+    await sdk.loadContractIds();
+    domainSuffix = testData.existingName.split('.').pop() || '';
   });
 
   // Test for isNameAvailable
@@ -99,7 +102,7 @@ describe('ThothIdSDK', () => {
   // Test for validateKeyFormat
   it('should validate a key format', async () => {
     console.log('\n--- Test: validateKeyFormat ---');
-    const isValid = await sdk.validateKeyFormat('profile_website', 'https://example.com');
+    const isValid = await sdk.validateKeyFormat('profile_website', 'https://example.com', domainSuffix);
     console.log('  - Expected:', true);
     console.log('  - Received:', isValid);
     expect(isValid).toBe(true);
@@ -109,7 +112,7 @@ describe('ThothIdSDK', () => {
   // Test for getDevAddress
   it('should get the developer address', async () => {
     console.log('\n--- Test: getDevAddress ---');
-    const devAddress = await sdk.getDevAddress();
+    const devAddress = await sdk.getDevAddress(domainSuffix);
     console.log('  - Received:', devAddress);
     expect(devAddress).toBeDefined();
     console.log('-----------------------------\n');
@@ -118,7 +121,7 @@ describe('ThothIdSDK', () => {
   // Test for getContractDomain
   it('should get the contract domain', async () => {
     console.log('\n--- Test: getContractDomain ---');
-    const domain = await sdk.getContractDomain();
+    const domain = await sdk.getContractDomain(domainSuffix);
     console.log('  - Received:', domain);
     expect(domain).toBeDefined();
     console.log('---------------------------------\n');
@@ -164,7 +167,7 @@ describe('ThothIdSDK', () => {
   // Test for getFeeMultiplier
   it('should get the fee multiplier for a name length', async () => {
     console.log('\n--- Test: getFeeMultiplier ---');
-    const multiplier = await sdk.getFeeMultiplier(5);
+    const multiplier = await sdk.getFeeMultiplier(5, domainSuffix);
     console.log('  - Received:', multiplier);
     expect(multiplier).toBeDefined();
     console.log('----------------------------------\n');
@@ -173,7 +176,7 @@ describe('ThothIdSDK', () => {
   // Test for getManagerNames
   it('should get names for a manager', async () => {
     console.log('\n--- Test: getManagerNames ---');
-    const names = await sdk.getManagerNames(testData.managerAddress);
+    const names = await sdk.getManagerNames(testData.managerAddress, domainSuffix);
     console.log('  - Received:', names);
     expect(names).toBeDefined();
     expect(Array.isArray(names)).toBe(true);
@@ -183,7 +186,7 @@ describe('ThothIdSDK', () => {
   // Test for getManagerPrimaryName
   it('should get the primary name for a manager', async () => {
     console.log('\n--- Test: getManagerPrimaryName ---');
-    const primaryName = await sdk.getManagerPrimaryName(testData.managerAddress);
+    const primaryName = await sdk.getManagerPrimaryName(testData.managerAddress, domainSuffix);
     console.log('  - Received:', primaryName);
     expect(primaryName).toBeDefined();
     console.log('--------------------------------------\n');
@@ -192,7 +195,7 @@ describe('ThothIdSDK', () => {
   // Test for getFeeStructure
   it('should get the fee structure', async () => {
     console.log('\n--- Test: getFeeStructure ---');
-    const feeStructure = await sdk.getFeeStructure();
+    const feeStructure = await sdk.getFeeStructure(domainSuffix);
     console.log('  - Received:', feeStructure);
     expect(feeStructure).toBeDefined();
     console.log('-------------------------------\n');
@@ -201,7 +204,7 @@ describe('ThothIdSDK', () => {
   // Test for getMaxProfileDataEntries
   it('should get max profile data entries', async () => {
     console.log('\n--- Test: getMaxProfileDataEntries ---');
-    const maxEntries = await sdk.getMaxProfileDataEntries();
+    const maxEntries = await sdk.getMaxProfileDataEntries(domainSuffix);
     console.log('  - Received:', maxEntries);
     expect(typeof maxEntries).toBe('number');
     console.log('------------------------------------------\n');
@@ -210,7 +213,7 @@ describe('ThothIdSDK', () => {
   // Test for getMaxProfileKeyLength
   it('should get max profile key length', async () => {
     console.log('\n--- Test: getMaxProfileKeyLength ---');
-    const maxLength = await sdk.getMaxProfileKeyLength();
+    const maxLength = await sdk.getMaxProfileKeyLength(domainSuffix);
     console.log('  - Received:', maxLength);
     expect(typeof maxLength).toBe('number');
     console.log('----------------------------------------\n');
@@ -219,7 +222,7 @@ describe('ThothIdSDK', () => {
   // Test for getMaxProfileValueLength
   it('should get max profile value length', async () => {
     console.log('\n--- Test: getMaxProfileValueLength ---');
-    const maxLength = await sdk.getMaxProfileValueLength();
+    const maxLength = await sdk.getMaxProfileValueLength(domainSuffix);
     console.log('  - Received:', maxLength);
     expect(typeof maxLength).toBe('number');
     console.log('------------------------------------------\n');
@@ -228,7 +231,7 @@ describe('ThothIdSDK', () => {
   // Test for getMaxTokenSymbolLength
   it('should get max token symbol length', async () => {
     console.log('\n--- Test: getMaxTokenSymbolLength ---');
-    const maxLength = await sdk.getMaxTokenSymbolLength();
+    const maxLength = await sdk.getMaxTokenSymbolLength(domainSuffix);
     console.log('  - Received:', maxLength);
     expect(typeof maxLength).toBe('number');
     console.log('-----------------------------------------\n');
@@ -237,7 +240,7 @@ describe('ThothIdSDK', () => {
   // Test for getMaxTotalProfileSize
   it('should get max total profile size', async () => {
     console.log('\n--- Test: getMaxTotalProfileSize ---');
-    const maxSize = await sdk.getMaxTotalProfileSize();
+    const maxSize = await sdk.getMaxTotalProfileSize(domainSuffix);
     console.log('  - Received:', maxSize);
     expect(typeof maxSize).toBe('number');
     console.log('---------------------------------------\n');
@@ -246,7 +249,7 @@ describe('ThothIdSDK', () => {
   // Test for getGracePeriodDays
   it('should get grace period days', async () => {
     console.log('\n--- Test: getGracePeriodDays ---');
-    const gracePeriod = await sdk.getGracePeriodDays();
+    const gracePeriod = await sdk.getGracePeriodDays(domainSuffix);
     console.log('  - Received:', gracePeriod);
     expect(typeof gracePeriod).toBe('number');
 console.log('---------------------------------\n');
@@ -258,7 +261,7 @@ console.log('---------------------------------\n');
     console.log('\n--- Test: callMultiple ---');
     const results = await sdk.callMultiple([
       { method: 'get_contract_domain' }
-    ]);
+    ], domainSuffix);
     console.log('  - Received:', results);
     expect(Array.isArray(results)).toBe(true);
     expect(results.length).toBe(1);
