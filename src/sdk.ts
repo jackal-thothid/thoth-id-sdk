@@ -232,17 +232,7 @@ export class ThothIdSDK {
   }
 
   private _getContractIdFromSuffix(suffix: string): string {
-    // 1. Use the contractId from the SDK options (for testing)
-    if (this.contractId) {
-      return this.contractId;
-    }
-    // 2. Resolve the contractId from the suffix
-    const fromSuffix = this.contractIds[suffix];
-    if (fromSuffix) {
-      return fromSuffix;
-    }
-    // 3. If all else fails, throw an error
-    throw new Error(`Could not determine contract ID for suffix "${suffix}".`);
+    return this._getContractId(`name.${suffix}`);
   }
 
   async validateKeyFormat(key: string, value: string, domainSuffix: string) {
