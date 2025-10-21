@@ -1,5 +1,14 @@
 # Welcome to the Thoth ID SDK 👋
 
+> [!WARNING]
+> **Disclaimer: Project Status**
+>
+> The Thoth ID project is currently under development.
+> * The nano contract has **not yet been launched** to any public Hathor network.
+> * The official API endpoint `domains.thoth.id` is **not yet active**.
+>
+> This SDK is provided for testing and integration purposes. You can use it with a local development environment or a testnet contract.
+
 This documentation will guide you through the process of integrating the Thoth ID SDK into your applications. Whether you're building a new decentralized application (dApp) or integrating with an existing one, this SDK provides all the tools you need to interact with the Thoth ID naming system on the Hathor Network. 🚀
 
 ## What is the Hathor Network? 🌐
@@ -9,7 +18,7 @@ The Hathor Network is a scalable and easy-to-use blockchain platform designed fo
 Key features of the Hathor Network include:
 
 *   **Scalability:** A novel architecture that can handle a high volume of transactions. 📈
-*   **Ease of Use:** Simplified token creation and smart contract deployment. 👍
+*   **Ease of Use:** Simplified token creation and nano contract deployment. 👍
 *   **Security:** A secure and reliable network for decentralized applications. 🔒
 
 ## What is Thoth ID? 🆔
@@ -28,7 +37,6 @@ The Thoth ID SDK is a TypeScript library that simplifies interaction with the Th
 
 *   Resolve Thoth IDs to wallet addresses.
 *   Check if a Thoth ID is available.
-*   Register a new Thoth ID.
-*   And much more!
+*   And more!
 
 By using this SDK, you can easily integrate Thoth ID functionalities into your applications without having to worry about the low-level details of interacting with the nano contracts.

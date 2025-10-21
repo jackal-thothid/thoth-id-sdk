@@ -1,5 +1,14 @@
 # Getting Started 🚀
 
+> [!WARNING]
+> **Disclaimer: Project Status**
+>
+> The Thoth ID project is currently under development.
+> * The nano contract has **not yet been launched** to any public Hathor network.
+> * The official API endpoint `domains.thoth.id` is **not yet active**.
+>
+> This SDK is provided for testing and integration purposes. You can use it with a local development environment or a testnet contract.
+
 First, import and instantiate the SDK. The SDK is configured by default to connect to the main Hathor network and the main Thoth ID contract API.
 
 After creating an instance of the SDK, you must call `loadContractIds()` to fetch the map of available domain suffixes and their corresponding contract IDs.
