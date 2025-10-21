@@ -1,7 +1,6 @@
 # Welcome to the Thoth ID SDK 👋
 
-> [!WARNING]
-> **Disclaimer: Project Status**
+> 🚧 **Disclaimer: Project Status** 🚧
 >
 > The Thoth ID project is currently under development.
 > * The nano contract has **not yet been launched** to any public Hathor network.
