@@ -10,6 +10,8 @@
 
 This documentation will guide you through the process of integrating the Thoth ID SDK into your applications. Whether you're building a new decentralized application (dApp) or integrating with an existing one, this SDK provides all the tools you need to interact with the Thoth ID naming system on the Hathor Network. 🚀
 
+You can find the source code for this SDK on [GitHub](https://github.com/jackal-thothid/thoth-id-sdk).
+
 ## What is the Hathor Network? 🌐
 
 The Hathor Network is a scalable and easy-to-use blockchain platform designed for real-world use cases. It features a unique hybrid architecture that combines a Directed Acyclic Graph (DAG) of transactions with a blockchain of blocks. This design allows Hathor to be highly scalable and to process a large number of transactions per second with no fees.
