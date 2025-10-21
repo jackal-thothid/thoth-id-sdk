@@ -1,4 +1,4 @@
-# Getting Started
+# Getting Started 🚀
 
 First, import and instantiate the SDK. The SDK is configured by default to connect to the main Hathor network and the main Thoth ID contract API.
 
@@ -31,7 +31,7 @@ async function initializeTestnetSDK() {
 }
 ```
 
-### Using a specific `contractId` (for testing)
+### Using a specific `contractId` (for testing) 🧪
 
 For testing or development purposes, you can instantiate the SDK with a specific `contractId`. This will bypass the contract resolution from the `contractApiUrl` and force the SDK to use the provided `contractId` for all calls.
 
@@ -48,7 +48,7 @@ async function initializeTestSDKWithContractId() {
 }
 ```
 
-## Examples
+## Examples 📖
 
 Here are some examples of how to use the Thoth ID SDK.
 
@@ -89,9 +89,9 @@ async function checkAvailability() {
 
     const isAvailable = await sdk.isNameAvailable("newname.htr");
     if (isAvailable) {
-      console.log("The name 'newname.htr' is available!");
+      console.log("The name 'newname.htr' is available! ✅");
     } else {
-      console.log("The name 'newname.htr' is already taken.");
+      console.log("The name 'newname.htr' is already taken. ❌");
     }
 
   } catch (error) {

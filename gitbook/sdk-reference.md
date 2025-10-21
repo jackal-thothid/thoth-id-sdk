@@ -1,4 +1,4 @@
-# SDK Reference
+# SDK Reference 📖
 
 This section provides a detailed overview of the classes and methods available in the Thoth ID SDK.
 

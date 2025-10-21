@@ -1,4 +1,4 @@
-# Summary
+# Summary 📚
 
 * [Introduction](README.md)
 * [Getting Started](getting-started.md)
@@ -32,4 +32,3 @@
     * [getMaxTotalProfileSize](sdk-reference/getMaxTotalProfileSize.md)
     * [validateKeyFormat](sdk-reference/validateKeyFormat.md)
     * [callMultiple](sdk-reference/callMultiple.md)
-* [Tests](tests.md)
