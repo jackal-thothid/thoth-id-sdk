@@ -53,6 +53,7 @@ export class ThothIdSDK {
 
   setNodeUrl(url: string) { this.nodeUrl = url; }
   setContractId(id: string) { this.contractId = id; }
+  setContractApiUrl(url: string) {this.contractApiUrl = url;}
 
   private serializeArg(arg: any): string {
     if (typeof arg === "string") {
