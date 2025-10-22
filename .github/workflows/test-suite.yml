@@ -28,7 +28,7 @@ jobs:
           else
             echo "Did not find '[ignore-test]' in commit message, running tests."
             echo "run_tests=true" >> $GITHUB_OUTPUT
-
+            
   test:
     name: Run Tests
     runs-on: ubuntu-latest
