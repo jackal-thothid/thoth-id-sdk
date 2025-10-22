@@ -1,6 +1,6 @@
 # Summary 📚
 
-* [Introduction](README.md)
+* [thoth.id Sdk Documentation](README.md)
 * [Getting Started](getting-started.md)
 * [SDK Reference](sdk-reference.md)
     * [constructor](sdk-reference/constructor.md)

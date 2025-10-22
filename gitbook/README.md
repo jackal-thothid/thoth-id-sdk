@@ -6,11 +6,11 @@
 > * The nano contract has **not yet been launched** to any public Hathor network.
 > * The official API endpoint `domains.thoth.id` is **not yet active**.
 >
-> This SDK is provided for testing and integration purposes. You can use it with a local development environment or a testnet contract.
+> This Sdk is provided for testing and integration purposes. You can use it with a local development environment or a testnet contract.
 
-## About the Documentation
+## About this Documentation
 
-This documentation will guide you through the process of integrating the thoth.id Sdk into your applications. Whether you're building a new decentralized application (dApp) or integrating with an existing one, this SDK provides all the tools you need to interact with the thoth.id naming system on the Hathor Network. 🚀
+This documentation will guide you through the process of integrating the thoth.id Sdk into your applications. Whether you're building a new decentralized application (dApp) or integrating with an existing one, this Sdk provides all the tools you need to interact with the thoth.id naming system on the Hathor Network. 🚀
 
 You can find the source code for this Sdk on [GitHub](https://github.com/jackal-thothid/thoth-id-sdk).
 
@@ -34,12 +34,12 @@ Key features of the Hathor Network include:
 *   **Ease of Use:** Simplified token creation and nano contract deployment. 👍
 *   **Security:** A secure and reliable network for decentralized applications. 🔒
 
-## The Purpose of this SDK 🛠️
+## The Purpose of this Sdk 🛠️
 
-The thoth.id SDK is a TypeScript library that simplifies interaction with the thoth.id nano contracts. It provides a set of easy-to-use methods that allow you to:
+The thoth.id Sdk is a TypeScript library that simplifies interaction with the thoth.id nano contracts. It provides a set of easy-to-use methods that allow you to:
 
 *   Resolve thoth.id names to wallet addresses.
 *   Check if a thoth.id is available.
 *   And more!
 
-By using this SDK, you can easily integrate thoth.id functionalities into your applications without having to worry about the low-level details of interacting with the nano contracts.
+By using this Sdk, you can easily integrate thoth.id functionalities into your applications without having to worry about the low-level details of interacting with the nano contracts.
