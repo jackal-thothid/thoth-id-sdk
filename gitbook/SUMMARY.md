@@ -3,7 +3,7 @@
 * [thoth.id Sdk Docs](README.md)
 * [Getting Started](getting-started.md)
 
-    * [Quickstart](getting-started.md)
+    * [Quickstart](quickstart.md)
     * [Resolve a Name](resolve-a-name.md)
 
 * [Sdk Reference](sdk-reference.md)
