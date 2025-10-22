@@ -1,18 +1,18 @@
-# SDK Reference 📖
+# Sdk Reference 📖
 
-This section provides a detailed overview of the classes and methods available in the Thoth ID SDK.
+This section provides a detailed overview of the classes and methods available in the thoth.id Sdk.
 
 ## Classes
 
 ### ThothIdSDK
 
-The main class for interacting with the Thoth ID nano contracts.
+The main class for interacting with the thoth.id nano contracts.
 
 ## Methods
 
 | Method | Description |
 | --- | --- |
-| [`constructor`](sdk-reference/constructor.md) | Creates a new instance of the SDK. |
+| [`constructor`](sdk-reference/constructor.md) | Creates a new instance of the Sdk. |
 | [`loadContractIds`](sdk-reference/loadContractIds.md) | Fetches the map of available domain suffixes and their corresponding contract IDs. |
 | [`setNodeUrl`](sdk-reference/setNodeUrl.md) | Sets the Hathor full-node URL. |
 | [`setContractId`](sdk-reference/setContractId.md) | Sets a specific contract ID to be used for all calls. |

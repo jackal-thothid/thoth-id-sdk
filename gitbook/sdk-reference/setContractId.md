@@ -6,7 +6,7 @@ Sets a specific contract ID to be used for all subsequent calls, overriding any 
 
 This method is primarily intended for **testing and development**.
 
-It allows you to force the SDK to use a specific nano contract, such as one you've deployed locally or on a testnet. When a contract ID is set via this method, the SDK will ignore the `contractApiUrl` and the domain suffix-based resolution provided by `loadContractIds()`.
+It allows you to force the Sdk to use a specific nano contract, such as one you've deployed locally or on a testnet. When a contract ID is set via this method, the Sdk will ignore the `contractApiUrl` and the domain suffix-based resolution provided by `loadContractIds()`.
 
 ## Parameters
 
@@ -21,10 +21,10 @@ It allows you to force the SDK to use a specific nano contract, such as one you'
 ```typescript
 import { ThothIdSDK } from "thoth-id-sdk";
 
-// Instantiate the SDK
+// Instantiate the Sdk
 const sdk = new ThothIdSDK();
 
-// For testing, force the SDK to use a specific contract ID
+// For testing, force the Sdk to use a specific contract ID
 sdk.setContractId("YOUR_TEST_CONTRACT_ID");
 
 // Now, all calls will be directed to "YOUR_TEST_CONTRACT_ID"
