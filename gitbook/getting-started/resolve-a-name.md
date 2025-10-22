@@ -20,3 +20,14 @@ async function resolveName() {
 
 resolveName();
 ```
+Or in a simple way:
+
+```typescript
+
+import { ThothIdSDK } from "thoth-id-sdk";
+
+const sdk = new ThothIdSDK();
+await sdk.loadContractIds();
+
+const walletAddr = sdk.resolveName("example.htr");
+```

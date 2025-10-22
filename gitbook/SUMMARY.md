@@ -3,8 +3,10 @@
 * [thoth.id Sdk Docs](README.md)
 * [Getting Started](getting-started.md)
 
-    * [Quickstart](quickstart.md)
-    * [Resolve a Name](resolve-a-name.md)
+    * [Quickstart](getting-started/quickstart.md)
+    * [Resolve a Name](getting-started/resolve-a-name.md)
+    * [Check Name Availability](getting-started/check-name-availability.md)
+    * [Check Name Status](getting-started/check-name-status.md)
 
 * [Sdk Reference](sdk-reference.md)
     

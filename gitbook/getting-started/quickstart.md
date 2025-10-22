@@ -1,16 +1,30 @@
 # Getting Started 🚀
 
-> 🚧 **Disclaimer: Project Status** 🚧
->
-> The thoth.id project is currently under development.
-> * The nano contract has **not yet been launched** to any public Hathor network.
-> * The official API endpoint `domains.thoth.id` is **not yet active**.
->
-> This Sdk is provided for testing and integration purposes. You can use it with a local development environment or a testnet contract.
+## (Very fast) quickstart
+
+This is an example of simple usage of thoth.id Sdk:
+
+```typescript
+import { ThothIdSDK } from "thoth-id-sdk";
+
+// ... code ...
+ 
+const sdk = new ThothIdSDK();
+
+await sdk.loadContractIds();
+
+const walletAddr = sdk.resolveName("example.htr");
+
+// --- more code
+```
+
+For more information read other sections.
+
+## Overview
 
 First, import and instantiate the Sdk. The Sdk is configured by default to connect to the main Hathor network and the main thoth.id contract API.
 
-After creating an instance of the Sdk, you must call `loadContractIds()` to fetch the map of available domain suffixes and their corresponding contract IDs.
+After creating an instance of the Sdk, you must call `loadContractIds()` to fetch the map of available domain suffixes and their corresponding contract IDs. It must be done because the Sdk does not store information about Hathor Network Contract Ids.
 
 ```typescript
 import { ThothIdSDK } from "thoth-id-sdk";
@@ -39,6 +53,8 @@ async function initializeTestnetSDK() {
 }
 ```
 
+It is possible to change `nodeUrl` and `contractApiUrl`, but we recommend using the default values. Custom URLs are intended primarily for testing purposes.
+
 ### Using a specific `contractId` (for testing) 🧪
 
 For testing or development purposes, you can instantiate the Sdk with a specific `contractId`. This will bypass the contract resolution from the `contractApiUrl` and force the Sdk to use the provided `contractId` for all calls.
@@ -55,3 +71,5 @@ async function initializeTestSDKWithContractId() {
   return sdk;
 }
 ```
+
+The next section will show examples of usage.
