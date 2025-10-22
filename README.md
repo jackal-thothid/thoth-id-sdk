@@ -26,7 +26,7 @@ yarn add thoth-id-sdk
 ## Documentation
 
 For comprehensive guides, API reference, and detailed examples, please visit our official documentation:
-[thoth.id Sdk Documentation](https://thoth-id-1.gitbook.io/thoth-id-sdk/)
+[thoth.id Sdk Documentation](https://docs.thoth.id)
 
 ## License
 
