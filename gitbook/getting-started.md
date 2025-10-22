@@ -2,13 +2,13 @@
 
 > 🚧 **Disclaimer: Project Status** 🚧
 >
-> The Thoth ID project is currently under development.
+> The thoth.id project is currently under development.
 > * The nano contract has **not yet been launched** to any public Hathor network.
 > * The official API endpoint `domains.thoth.id` is **not yet active**.
 >
 > This SDK is provided for testing and integration purposes. You can use it with a local development environment or a testnet contract.
 
-First, import and instantiate the SDK. The SDK is configured by default to connect to the main Hathor network and the main Thoth ID contract API.
+First, import and instantiate the Sdk. The Sdk is configured by default to connect to the main Hathor network and the main thoth.id contract API.
 
 After creating an instance of the SDK, you must call `loadContractIds()` to fetch the map of available domain suffixes and their corresponding contract IDs.
 
@@ -58,11 +58,11 @@ async function initializeTestSDKWithContractId() {
 
 ## Examples 📖
 
-Here are some examples of how to use the Thoth ID SDK.
+Here are some examples of how to use the thoth.id Sdk.
 
 ### Resolve a Name
 
-This example shows how to resolve a Thoth ID name to its associated wallet address.
+This example shows how to resolve a thoth.id name to its associated wallet address.
 
 ```typescript
 import { ThothIdSDK } from "thoth-id-sdk";
@@ -72,8 +72,8 @@ async function resolveName() {
     const sdk = new ThothIdSDK();
     await sdk.loadContractIds();
 
-    const ownerAddress = await sdk.resolveName("example.htr");
-    console.log(`The address for example.htr is:`, ownerAddress);
+    const walletAddress = await sdk.resolveName("example.htr");
+    console.log(`The address for example.htr is:`, walletAddress);
 
   } catch (error) {
     console.error("Error resolving name:", error);
