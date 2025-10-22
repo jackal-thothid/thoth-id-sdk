@@ -48,7 +48,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Clone Thoth ID environment repository
+      - name: Clone thoth-id environment repository
         run: git clone --branch thoth-master https://github.com/Thoth-Namesystem/thoth-id.git thoth-id-env
 
       - name: Start Contract ID API
@@ -56,7 +56,7 @@ jobs:
           cd tests/contract-id-api
           docker compose -f docker-compose.contract-id-api.yml up -d
 
-      - name: Start Thoth ID Environment
+      - name: Start thoth-id Environment
         run: |
           cd thoth-id-env
           docker compose up -d
