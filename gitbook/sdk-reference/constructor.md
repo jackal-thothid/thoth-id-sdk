@@ -4,7 +4,7 @@ Creates a new instance of the SDK.
 
 ## Parameters
 
-- `opts` (ThothSDKOptions): An optional object to configure the SDK instance.
+- `opts` (ThothSDKOptions): An optional object to configure the Sdk instance.
 
 ### ThothSDKOptions Schema
 

@@ -137,7 +137,7 @@ export class ThothIdSDK {
   }
 
   private _getContractId(name: string): string {
-    // 1. Use the contractId from the SDK options (for testing)
+    // 1. Use the contractId from the Sdk options (for testing)
     if (this.contractId) {
       return this.contractId;
     }

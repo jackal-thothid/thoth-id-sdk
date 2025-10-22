@@ -2,7 +2,12 @@
 
 * [thoth.id Sdk Docs](README.md)
 * [Getting Started](getting-started.md)
+
+    * [Quickstart](getting-started.md)
+    * [Resolve a Name](resolve-a-name.md)
+
 * [Sdk Reference](sdk-reference.md)
+    
     * Object Management 
         * [constructor](sdk-reference/constructor.md)
         * [loadContractIds](sdk-reference/loadContractIds.md)
