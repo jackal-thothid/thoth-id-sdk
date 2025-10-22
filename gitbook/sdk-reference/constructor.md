@@ -20,7 +20,7 @@ The `opts` parameter is an object of type `ThothSDKOptions` with the following p
 
 ## Returns
 
-- `ThothIdSDK`: A new instance of the Thoth ID SDK.
+- `ThothIdSDK`: A new instance of the thoth.id Sdk.
 
 ## Example
 

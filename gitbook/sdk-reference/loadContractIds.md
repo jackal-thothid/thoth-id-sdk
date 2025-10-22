@@ -6,7 +6,7 @@ Fetches the map of available domain suffixes (e.g., `.htr`, `.test`) and their c
 
 To remain flexible and support multiple domains, the SDK does **not** come with a hard-coded list of contract IDs. Instead, it must fetch this information from a trusted external source.
 
-By default, it will query the official Thoth ID API endpoint at `https://domains.thoth.id/contract-ids`. This endpoint provides a JSON object mapping each domain suffix to its active nano contract ID.
+By default, it will query the official thoth.id API endpoint at `https://domains.thoth.id/contract-ids`. This endpoint provides a JSON object mapping each domain suffix to its active nano contract ID.
 
 You must call this method after instantiating the SDK to ensure it knows which contracts to interact with for each domain.
 

@@ -22,7 +22,7 @@ With thoth.id, you can:
 
 *   **Create a unique digital identity:** Register a human-readable name that represents you on the Hathor Network. 👤
 *   **Simplify transactions:** Send and receive funds using your thoth.id instead of a long wallet address. 💸
-*   **Build a reputation:** Your Thoth ID can be used across multiple dApps, allowing you to build a consistent reputation within the ecosystem. 🏆
+*   **Build a reputation:** Your thoth.id name can be used across multiple dApps, allowing you to build a consistent reputation within the ecosystem. 🏆
 
 ## What is the Hathor Network? 🌐
 

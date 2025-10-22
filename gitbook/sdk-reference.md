@@ -1,12 +1,12 @@
-# SDK Reference 📖
+# Sdk Reference 📖
 
-This section provides a detailed overview of the classes and methods available in the Thoth ID SDK.
+This section provides a detailed overview of the classes and methods available in the thoth.id Sdk.
 
 ## Classes
 
 ### ThothIdSDK
 
-The main class for interacting with the Thoth ID nano contracts.
+The main class for interacting with the thoth.id nano contracts.
 
 ## Methods
 
