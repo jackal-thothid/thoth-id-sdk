@@ -4,7 +4,7 @@ Gets all names managed by a specific address on a given domain.
 
 ## Parameters
 
-- `manager_address` (string): The manager's wallet address.
+- `managerAddress` (string): The manager's wallet address.
 - `domainSuffix` (string): The domain suffix (e.g., `htr`).
 
 ## Returns

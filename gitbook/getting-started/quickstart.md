@@ -7,15 +7,19 @@ This is an example of simple usage of thoth.id Sdk:
 ```typescript
 import { ThothIdSDK } from "thoth-id-sdk";
 
-// ... code ...
- 
-const sdk = new ThothIdSDK();
+async function main() {
+    // ... code ...
+    
+    const sdk = new ThothIdSDK();
 
-await sdk.loadContractIds();
+    await sdk.loadContractIds();
 
-const walletAddr = sdk.resolveName("example.htr");
+    const walletAddr = await sdk.resolveName("example.htr");
 
-// --- more code
+    // --- more code
+}
+
+main();
 ```
 
 For more information read other sections.

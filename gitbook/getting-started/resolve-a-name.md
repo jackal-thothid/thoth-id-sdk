@@ -26,8 +26,12 @@ Or in a simple way:
 
 import { ThothIdSDK } from "thoth-id-sdk";
 
-const sdk = new ThothIdSDK();
-await sdk.loadContractIds();
+async function main() {
+    const sdk = new ThothIdSDK();
+    await sdk.loadContractIds();
 
-const walletAddr = sdk.resolveName("example.htr");
+    const walletAddr = await sdk.resolveName("example.htr");
+}
+
+main();
 ```

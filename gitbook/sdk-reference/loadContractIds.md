@@ -30,7 +30,7 @@ async function initializeSDK() {
   // Load the contract ID map from the default endpoint
   await sdk.loadContractIds();
 
-  console.log("Contract IDs loaded!", sdk.contractIds);
+  console.log("Contract IDs loaded!");
 
   return sdk;
 }
