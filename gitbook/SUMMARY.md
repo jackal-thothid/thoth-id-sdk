@@ -15,6 +15,7 @@
         * [loadContractIds](sdk-reference/loadContractIds.md)
         * [setNodeUrl](sdk-reference/setNodeUrl.md)
         * [setContractId](sdk-reference/setContractId.md)
+        * [setContractApiUrl](sdk-reference/setContractApiUrl.md)
 
     * Name Methods
         * [isNameAvailable](sdk-reference/isNameAvailable.md)
