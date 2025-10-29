@@ -3,6 +3,16 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import fetch from 'cross-fetch';
 
+function get_max_attempts(): number {
+    if(process.argv.length > 1)
+        for(const argv of process.argv)
+            if(argv.match(/^[0-9]+$/))
+                return parseInt(argv);
+
+    return 30;
+}
+
+
 // --- Helper function to generate random string ---
 function random_string(length: number, chars: string) {
     let result = '';
@@ -48,7 +58,7 @@ async function get_wallet_history(wallet_id: string, headless_api_key: string, h
 
 async function wait_new_block(wallet_id: string, headless_api_key: string, host: string, port: number) {
     let attempts = 0;
-    const max_attempts = 30;
+    const max_attempts = get_max_attempts();
 
     while (attempts < max_attempts) {
         try {
