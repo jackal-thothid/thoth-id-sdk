@@ -21,13 +21,17 @@ It allows you to force the Sdk to use a specific nano contract, such as one you'
 ```typescript
 import { ThothIdSDK } from "thoth-id-sdk";
 
-// Instantiate the Sdk
-const sdk = new ThothIdSDK();
+async function main() {
+    // Instantiate the Sdk
+    const sdk = new ThothIdSDK();
 
-// For testing, force the Sdk to use a specific contract ID
-sdk.setContractId("YOUR_TEST_CONTRACT_ID");
+    // For testing, force the Sdk to use a specific contract ID
+    sdk.setContractId("YOUR_TEST_CONTRACT_ID");
 
-// Now, all calls will be directed to "YOUR_TEST_CONTRACT_ID"
-// For example, this will try to resolve "example.htr" on your test contract
-const owner = await sdk.resolveName("example.htr");
+    // Now, all calls will be directed to "YOUR_TEST_CONTRACT_ID"
+    // For example, this will try to resolve "example.htr" on your test contract
+    const owner = await sdk.resolveName("example.htr");
+}
+
+main();
 ```
