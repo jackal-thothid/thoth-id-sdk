@@ -256,14 +256,14 @@ export class ThothIdSDK {
     return this.callView("get_fee_multiplier", [length], finalContractId, schemas.GetFeeMultiplierResponseSchema);
   }
 
-  async getManagerNames(manager_address: string, domainSuffix: string) {
+  async getManagerNames(managerAddress: string, domainSuffix: string) {
     const finalContractId = this._getContractIdFromSuffix(domainSuffix);
-    return this.callView("get_manager_names", [manager_address], finalContractId, schemas.GetManagerNamesResponseSchema);
+    return this.callView("get_manager_names", [managerAddress], finalContractId, schemas.GetManagerNamesResponseSchema);
   }
 
-  async getManagerPrimaryName(manager_address: string, domainSuffix: string) {
+  async getManagerPrimaryName(managerAddress: string, domainSuffix: string) {
     const finalContractId = this._getContractIdFromSuffix(domainSuffix);
-    return this.callView("get_manager_primary_name", [manager_address], finalContractId, schemas.GetManagerPrimaryNameResponseSchema);
+    return this.callView("get_manager_primary_name", [managerAddress], finalContractId, schemas.GetManagerPrimaryNameResponseSchema);
   }
 
   async getFeeStructure(domainSuffix: string) {
