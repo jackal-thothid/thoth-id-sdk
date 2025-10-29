@@ -16,6 +16,7 @@ The main class for interacting with the thoth.id nano contracts.
 | [`loadContractIds`](sdk-reference/loadContractIds.md) | Fetches the map of available domain suffixes and their corresponding contract IDs. |
 | [`setNodeUrl`](sdk-reference/setNodeUrl.md) | Sets the Hathor full-node URL. |
 | [`setContractId`](sdk-reference/setContractId.md) | Sets a specific contract ID to be used for all calls. |
+| [`setContractApiUrl`](sdk-reference/setContractApiUrl.md) | Sets the API URL for fetching contract IDs. |
 | [`isNameAvailable`](sdk-reference/isNameAvailable.md) | Checks if a name is available to be registered. |
 | [`resolveName`](sdk-reference/resolveName.md) | Resolves a name to its associated wallet address. |
 | [`getNameData`](sdk-reference/getNameData.md) | Retrieves the raw data associated with a name. |
