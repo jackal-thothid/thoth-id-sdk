@@ -68,7 +68,7 @@ jobs:
         run: |
           for i in 1 2 3; do
             echo "--- Starting Attempt $i of 3 ---"
-            if ! npm run test:setup; then
+            if ! npm run test:setup 10; then
               echo "Test setup failed on attempt $i."
               if [ $i -lt 3 ]; then
                 echo "Retrying in 30 seconds..."
