@@ -138,7 +138,7 @@ async function setup() {
         for (const domain of domains) {
             console.log(`--- Creating contract for ${domain} ---`);
             const create_contract_response = await create_nano_contract(env_config, address_master);
-            const contract_id = create_contract_response.hash;
+            const contract_id = create_contract_response.nc_id;
             contractIds[domain] = contract_id;
             console.log(`Updating contract-id-api with ${domain}: ${contract_id}`);
             await updateContractIdApi(domain, contract_id);
@@ -304,8 +304,8 @@ async function create_nano_contract(env_config: any, address_master: string) {
     const result = await response.json();
     console.log('Nano contract created successfully.');
     console.log(result);
-    if (!result.hash) {
-        throw new Error("Could not find 'hash' property in the response from /wallet/nano-contracts/create.");
+    if (!result.nc_id) {
+        throw new Error("Could not find 'nc_id' property in the response from /wallet/nano-contracts/create.");
     }
     return result;
 }
