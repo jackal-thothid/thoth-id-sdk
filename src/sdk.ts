@@ -16,14 +16,6 @@ export class ThothIdSDK {
     this.contractId = opts.contractId ?? null;
     this.timeoutMs = opts.timeoutMs ?? 15000;
     this.contractApiUrl = opts.contractApiUrl ?? "https://domains.thoth.id/contract-ids";
-
-    // if (opts.contractApiUrl) {
-    //   this.contractApiUrl = opts.contractApiUrl;
-    // } else {
-    //   const useSsl = opts.useSsl ?? true;
-    //   this.contractApiUrl = `${useSsl ? 'https' : 'http'}://domains.thoth.id/contract-ids`;
-    // }
-
   }
 
   async loadContractIds(url?: string): Promise<void> {
@@ -88,7 +80,6 @@ export class ThothIdSDK {
 
     const callStr = this.buildCallString(methodName, params);
     const baseUrl = this.nodeUrl.endsWith('/') ? this.nodeUrl.slice(0,-1): this.nodeUrl;
-    //const urlBase = `${baseUrl}v1a/nano_contract/state`;
     const url = `${baseUrl}?id=${encodeURIComponent(id)}&calls[]=${encodeURIComponent(callStr)}`;
 
     const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
@@ -331,7 +322,6 @@ export class ThothIdSDK {
         if (result?.errmsg) {
             throw new Error(`Smart contract error in method ${cs}: ${result.errmsg}`);
         }
-        // Note: Specific schema validation is not applied here as callMultiple can have mixed types.
         return result ? result.value : undefined;
     });
 

@@ -4,7 +4,6 @@ export type ThothSDKOptions = {
   nodeUrl?: string;
   contractId?: string | null;
   contractApiUrl?: string;
-  //useSsl?: boolean;
   timeoutMs?: number;
 };
 
