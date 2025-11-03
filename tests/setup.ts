@@ -109,11 +109,10 @@ async function setup() {
         console.log('Generated random domain:', random_domain);
 
         // Update test-config.json with node url and contract api url
-        const nodeUrl = `http://${env_config.node_wallet_host}:${env_config.node_wallet_port}/`;
+        const nodeUrl = `http://${env_config.node_wallet_host}:${env_config.node_wallet_port}/v1a/nano_contract/state`;
         test_config.sdkOptions = {
             nodeUrl: nodeUrl,
             contractApiUrl: 'http://localhost:3232/contract-ids',
-            useSsl: false,
         };
         console.log('Updating test-config.json with nodeUrl:', nodeUrl);
         console.log('Updating test-config.json with contractApiUrl:', test_config.sdkOptions.contractApiUrl);

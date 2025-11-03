@@ -1,8 +1,7 @@
 {
   "sdkOptions": {
     "nodeUrl": "",
-    "contractApiUrl": "http://localhost:3232/contract-ids",
-    "useSsl": false
+    "contractApiUrl": "http://localhost:3232/contract-ids"
   },
   "testData": {
     "existingName": "name.htr",
