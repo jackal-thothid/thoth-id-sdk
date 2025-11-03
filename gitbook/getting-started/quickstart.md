@@ -47,7 +47,7 @@ async function initializeSDK() {
 
 async function initializeTestnetSDK() {
   const sdk = new ThothIdSDK({
-    nodeUrl: "https://node1.testnet.hathor.network/",
+    nodeUrl: "https://node1.mainnet.hathor.network/v1a/nano_contract/state",
     contractApiUrl: "http://localhost:3232/contract-ids", // Your custom contract API
   });
 
