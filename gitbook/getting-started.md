@@ -2,11 +2,14 @@
 
 > 🚧 **Disclaimer: Project Status** 🚧
 >
-> The thoth.id project is currently under development.
-> * The nano contract has **not yet been launched** to any public Hathor network.
-> * The official API endpoint `domains.thoth.id` is **not yet active**.
+> The **thoth.id** project is currently under active development.
+> * The nano contract has **not yet been launched** on any public Hathor network, but it will soon be deployed to the **testnet**.
+> * The official API endpoint `domains.thoth.id` is **active**, but there are currently **no contract IDs** available. Once deployed to mainnet, there will be two endpoints:
+>   * `mainnet.domains.thoth.id`
+>   * `testnet.domains.thoth.id`
+>   (with `mainnet` being the default).
 >
-> This Sdk is provided for testing and integration purposes. You can use it with a local development environment or a testnet contract.
+> This SDK is provided for **testing and integration** purposes. You can use it with a **local development environment** or a **testnet contract**.
 
 If you want see quickstart, please see [this](getting-started/quickstart.md).
 

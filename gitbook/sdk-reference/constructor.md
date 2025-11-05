@@ -12,7 +12,7 @@ The `opts` parameter is an object of type `ThothSDKOptions` with the following p
 
 | Property | Type | Description | Default |
 | --- | --- | --- | --- |
-| `nodeUrl` | `string` | URL of the Hathor full-node to connect to. | `"https://node1.mainnet.hathor.network/v1a/nano_contract/state"` |
+| `nodeUrl` | `string` | URL of the Hathor full-node to connect to. | `"https://node1.testnet.hathor.network/v1a/nano_contract/state"` |
 | `contractApiUrl` | `string` | URL of the API that provides the contract ID map. | `"https://domains.thoth.id/contract-ids"` |
 | `contractId` | `string \| null` | A specific contract ID to use for all calls. This is mainly for testing purposes, allowing developers to use a local or test contract by overriding the contract ID resolution that would normally come from the `contractApiUrl`. | `null` |
 | `timeoutMs` | `number` | The timeout in milliseconds for network requests to the Hathor node. | `15000` |

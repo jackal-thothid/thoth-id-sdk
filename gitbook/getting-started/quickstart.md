@@ -34,7 +34,7 @@ After creating an instance of the Sdk, you must call `loadContractIds()` to fetc
 import { ThothIdSDK } from "thoth-id-sdk";
 
 async function initializeSDK() {
-  // Connect to mainnet with default settings
+  // Connect to testnet with default settings
   const sdk = new ThothIdSDK();
 
   // Load the contract ID map
