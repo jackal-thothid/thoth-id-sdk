@@ -12,7 +12,7 @@ export class ThothIdSDK {
   timeoutMs: number;
 
   constructor(opts: ThothSDKOptions = {}) {
-    this.nodeUrl = opts.nodeUrl ?? "https://node1.mainnet.hathor.network/v1a/nano_contract/state";
+    this.nodeUrl = opts.nodeUrl ?? "https://node1.testnet.hathor.network/v1a/nano_contract/state";
     this.contractId = opts.contractId ?? null;
     this.timeoutMs = opts.timeoutMs ?? 15000;
     this.contractApiUrl = opts.contractApiUrl ?? "https://domains.thoth.id/contract-ids";
