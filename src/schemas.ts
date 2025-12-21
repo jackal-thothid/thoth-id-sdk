@@ -22,7 +22,9 @@ export const GetNameDataResponseSchema = z.object({
   manager_address: z.string(),
   resolving_address: z.string(),
   expiration_date: z.string(),
-}).catchall(z.string());
+}).strict();
+
+export const GetProfileDataResponseSchema = z.record(z.string(), z.string());
 
 export const GetNameOwnerResponseSchema = z.string();
 
