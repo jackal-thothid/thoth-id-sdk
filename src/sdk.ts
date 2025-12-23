@@ -144,6 +144,14 @@ export class ThothIdSDK {
     throw new Error(`Could not determine contract ID for name "${name}". No contractId was provided and the suffix does not match a known contract.`);
   }
 
+  private _getB58Address(address: string): string {
+    if (typeof address === 'string' && /^[0-9a-fA-F]+$/.test(address)) {
+        const buffer = Buffer.from(address, 'hex');
+        return encode(buffer);
+    }
+    return address;
+  }
+
   async isNameAvailable(name: string) {
     const finalContractId = this._getContractId(name);
     const nameWithoutSuffix = name.split('.').slice(0, -1).join('.');
@@ -156,11 +164,7 @@ export class ThothIdSDK {
     const nameWithoutSuffix = name.split('.').slice(0, -1).join('.');
     const now_timestamp = Math.floor(Date.now() / 1000);
     const hexAddress = await this.callView("resolve_name", [nameWithoutSuffix, now_timestamp], finalContractId, schemas.ResolveNameResponseSchema);
-    if (typeof hexAddress === 'string' && /^[0-9a-fA-F]+$/.test(hexAddress)) {
-        const buffer = Buffer.from(hexAddress, 'hex');
-        return encode(buffer);
-    }
-    return hexAddress;
+    return this._getB58Address(hexAddress);
   }
 
   async getNameData(name: string) {
@@ -173,11 +177,7 @@ export class ThothIdSDK {
     const finalContractId = this._getContractId(name);
     const nameWithoutSuffix = name.split('.').slice(0, -1).join('.');
     const hexAddress = await this.callView("get_name_owner", [nameWithoutSuffix], finalContractId, schemas.GetNameOwnerResponseSchema);
-    if (typeof hexAddress === 'string' && /^[0-9a-fA-F]+$/.test(hexAddress)) {
-        const buffer = Buffer.from(hexAddress, 'hex');
-        return encode(buffer);
-    }
-    return hexAddress;
+    return this._getB58Address(hexAddress);
   }
 
   async getNameExpirationInfo(name: string) {
