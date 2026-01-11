@@ -19,7 +19,7 @@ export const ResolveNameResponseSchema = z.string();
 export const GetNameDataResponseSchema = z.object({
   token_uid: z.string(),
   owner_address: z.string(),
-  is_deposit: z.boolean(),
+  is_deposited: z.boolean(),
   manager_address: z.string(),
   resolving_address: z.string(),
   expiration_date: z.string(),
