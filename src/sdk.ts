@@ -173,6 +173,12 @@ export class ThothIdSDK {
     return this.callView("get_name_data", [nameWithoutSuffix], finalContractId, schemas.GetNameDataResponseSchema);
   }
 
+  async getProfileData(name: string) {
+    const finalContractId = this._getContractId(name);
+    const nameWithoutSuffix = name.split('.').slice(0, -1).join('.');
+    return this.callView("get_profile_data", [nameWithoutSuffix], finalContractId, schemas.GetProfileDataResponseSchema);
+  }
+
   async getNameOwner(name: string) {
     const finalContractId = this._getContractId(name);
     const nameWithoutSuffix = name.split('.').slice(0, -1).join('.');
