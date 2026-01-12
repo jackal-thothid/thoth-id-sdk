@@ -21,6 +21,7 @@
         * [isNameAvailable](sdk-reference/isNameAvailable.md)
         * [resolveName](sdk-reference/resolveName.md)
         * [getNameData](sdk-reference/getNameData.md)
+        * [getProfileData](sdk-reference/getProfileData.md)
         * [getNameOwner](sdk-reference/getNameOwner.md)
         * [getNameExpirationInfo](sdk-reference/getNameExpirationInfo.md)
         * [getNameExpirationDate](sdk-reference/getNameExpirationDate.md)

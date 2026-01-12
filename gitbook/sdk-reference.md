@@ -20,6 +20,7 @@ The main class for interacting with the thoth.id nano contracts.
 | [`isNameAvailable`](sdk-reference/isNameAvailable.md) | Checks if a name is available to be registered. |
 | [`resolveName`](sdk-reference/resolveName.md) | Resolves a name to its associated wallet address. |
 | [`getNameData`](sdk-reference/getNameData.md) | Retrieves the raw data associated with a name. |
+| [`getProfileData`](sdk-reference/getProfileData.md) | Retrieves the profile data associated with a name. |
 | [`getNameOwner`](sdk-reference/getNameOwner.md) | Gets the owner's address for a given name. |
 | [`getNameExpirationInfo`](sdk-reference/getNameExpirationInfo.md) | Gets expiration information for a name. |
 | [`getNameExpirationDate`](sdk-reference/getNameExpirationDate.md) | Gets the exact expiration date of a name. |
