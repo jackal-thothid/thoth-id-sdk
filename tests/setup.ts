@@ -280,7 +280,8 @@ async function create_nano_contract(env_config: any, address_master: string) {
                 1000,
                 5,
                 10000,
-                30
+                30,
+                100
             ]
         }
     };

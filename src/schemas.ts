@@ -19,10 +19,13 @@ export const ResolveNameResponseSchema = z.string();
 export const GetNameDataResponseSchema = z.object({
   token_uid: z.string(),
   owner_address: z.string(),
+  is_deposited: z.string(),
   manager_address: z.string(),
   resolving_address: z.string(),
   expiration_date: z.string(),
-}).catchall(z.string());
+}).strict();
+
+export const GetProfileDataResponseSchema = z.record(z.string(), z.string());
 
 export const GetNameOwnerResponseSchema = z.string();
 

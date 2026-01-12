@@ -39,6 +39,13 @@ describe('ThothIdSDK', () => {
     expect(nameData).toBeDefined();
   }, 30000);
 
+  // Test for getProfileData
+  it('should get profile data for a name', async () => {
+    const profileData = await sdk.getProfileData(testData.existingName);
+    expect(profileData).toBeDefined();
+    expect(typeof profileData).toBe('object');
+  }, 30000);
+
   // Test for getNameOwner
   it('should get the owner of a name', async () => {
     const owner = await sdk.getNameOwner(testData.existingName);
