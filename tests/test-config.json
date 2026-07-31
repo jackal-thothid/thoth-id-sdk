@@ -1,0 +1,46 @@
+{
+  "_comment": "Expected state of the public Hathor testnet. These tests need no setup: they run against the live ThothNamer registries the Sdk discovers on its own. Update this file if the testnet contracts change.",
+  "sdkOptions": {},
+  "_domains_comment": "The registries the tests require, and the lower bound of what discovery must return. Each one listed here must be discovered and must point at exactly this contract; registries added to testnet later are fine and simply ignored. Add an entry here to cover a new domain.",
+  "domains": [
+    {
+      "suffix": "htr",
+      "contractId": "00001f87ed606c28465afac15fe3805736993f77d4cc83da026531e120469d73",
+      "devAddress": "WjcD1MGLi1TS8pH1JRcYzd9bJ1YPejVRtH",
+      "registeredName": "jackal.htr",
+      "ownerAddress": "WjcD1MGLi1TS8pH1JRcYzd9bJ1YPejVRtH",
+      "primaryName": "jackal",
+      "nonOwnerAddress": "WZhKusv57pvzotZrf4s7yt7P7PXEqyFTHk"
+    },
+    {
+      "suffix": "tst",
+      "contractId": "00001fc6bffd8295214ac0709e2b90d03575f849c2358866114e43d5c4c39a63",
+      "devAddress": "WZhKusv57pvzotZrf4s7yt7P7PXEqyFTHk",
+      "registeredName": "jackal.tst",
+      "ownerAddress": "WZhKusv57pvzotZrf4s7yt7P7PXEqyFTHk",
+      "primaryName": "jackal",
+      "nonOwnerAddress": "WjcD1MGLi1TS8pH1JRcYzd9bJ1YPejVRtH"
+    }
+  ],
+  "contractSettings": {
+    "feeStructure": {
+      "base_fee": 1,
+      "three_length_multiplier": 20,
+      "four_length_multiplier": 10,
+      "five_plus_length_multiplier": 1,
+      "default_multiplier": 1
+    },
+    "gracePeriodDays": 30,
+    "maxProfileDataEntries": 20,
+    "maxProfileKeyLength": 50,
+    "maxProfileValueLength": 1000,
+    "maxTokenSymbolLength": 5,
+    "maxTotalProfileSize": 10000,
+    "feeMultipliersByLength": { "3": 20, "4": 10, "5": 1, "10": 1 }
+  },
+  "validNames": ["validname.htr", "jackal.htr"],
+  "invalidNames": ["Invalid-Name.htr", "Inv@lid.htr", "ab.htr", "UPPER.htr", "with space.htr"],
+  "feesByName": { "abc.htr": 20, "abcd.htr": 10, "abcde.htr": 1 },
+  "unknownSuffixName": "alice.nope",
+  "nameWithoutSuffix": "nosuffix"
+}

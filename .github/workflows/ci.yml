@@ -1,0 +1,13 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches-ignore:
+      - 'main'
+  pull_request:
+    branches:
+      - 'main'
+
+jobs:
+  run-test-suite:
+    uses: ./.github/workflows/test-suite.yml
