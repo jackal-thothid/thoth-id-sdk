@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from "axios";
 import { encode } from "bs58";
 import { z, ZodType } from "zod";
 import * as schemas from "./schemas";
-import { ContractIdMap, ThothSDKOptions } from "./index";
+import { CallResult, ContractIdMap, ThothSDKOptions } from "./index";
 
 export const DEFAULT_NODE_URL = "https://node1.testnet.hathor.network/v1a/nano_contract/state";
 
@@ -16,17 +16,18 @@ const CREATION_PAGE_SIZE = 100;
 const MAX_CREATION_PAGES = 50;
 
 /**
- * Retries granted to a discovery request that failed for a reason worth trying
+ * Retries granted by default to a request that failed for a reason worth trying
  * again (rate limiting, a gateway hiccup, a dropped connection).
  *
  * Public nodes sit behind an nginx that shapes requests to roughly one per
- * second and answers a burst with `429 Too Many Requests`, so discovery issues
- * its `history` requests one at a time and backs off when it is throttled.
+ * second and answers a burst with `429 Too Many Requests`, so every request
+ * backs off when it is throttled, and discovery also issues its `history`
+ * requests one at a time.
  */
-const DISCOVERY_RETRIES = 3;
+const DEFAULT_RETRIES = 3;
 
-/** Base of the exponential backoff between discovery retries. */
-const DISCOVERY_RETRY_DELAY_MS = 1000;
+/** Base of the exponential backoff between retries. */
+const RETRY_DELAY_MS = 1000;
 
 /** Status codes worth retrying: rate limiting and transient gateway errors. */
 const RETRYABLE_STATUSES = [429, 502, 503, 504];
@@ -52,12 +53,24 @@ function normalizeContractIds(contractIds: ContractIdMap): ContractIdMap {
   return normalized;
 }
 
+/** Drops `undefined` values, e.g. from an unset environment variable. */
+function definedHeaders(headers: ThothSDKOptions["headers"]): Record<string, string> {
+  const defined: Record<string, string> = {};
+  for (const [name, value] of Object.entries(headers ?? {})) {
+    if (value !== undefined) {
+      defined[name] = value;
+    }
+  }
+  return defined;
+}
+
 export class ThothIdSDK {
   nodeUrl: string;
   contractId?: string | null;
   blueprintId: string;
   contractIds: ContractIdMap = {};
   timeoutMs: number;
+  retries: number;
   private http: AxiosInstance;
   /** In-flight (or settled) discovery, so the map is collected only once. */
   private discovery: Promise<ContractIdMap> | null = null;
@@ -67,6 +80,7 @@ export class ThothIdSDK {
     this.contractId = opts.contractId ?? null;
     this.blueprintId = opts.blueprintId ?? DEFAULT_BLUEPRINT_ID;
     this.timeoutMs = opts.timeoutMs ?? 15000;
+    this.retries = opts.retries ?? DEFAULT_RETRIES;
 
     // Use only the browser-capable adapters (fetch/xhr) and never axios's Node
     // `http` adapter. When a bundler resolves axios's Node build into a browser
@@ -84,6 +98,7 @@ export class ThothIdSDK {
     this.http = axios.create({
       timeout: this.timeoutMs,
       adapter: ["fetch", "xhr"],
+      headers: definedHeaders(opts.headers),
     });
 
     if (opts.contractIds) {
@@ -189,8 +204,7 @@ export class ThothIdSDK {
       const response = await this.getValidated(
         url,
         schemas.NanoContractCreationResponseSchema,
-        "nano contract creation",
-        DISCOVERY_RETRIES
+        "nano contract creation"
       );
 
       const pageIds: string[] = response.nc_creation_txs.map((tx) => tx.nano_contract_id);
@@ -229,8 +243,7 @@ export class ThothIdSDK {
     const response = await this.getValidated(
       url,
       schemas.NanoContractHistoryResponseSchema,
-      "nano contract history",
-      DISCOVERY_RETRIES
+      "nano contract history"
     );
 
     const creationTx = response.history[0];
@@ -296,14 +309,14 @@ export class ThothIdSDK {
     return true;
   }
 
-  private async fetchJson(url: string, retries = 0): Promise<any> {
+  private async fetchJson(url: string): Promise<any> {
     for (let attempt = 0; ; attempt++) {
       try {
         const response = await this.http.get(url);
         return response.data;
       } catch (err: any) {
-        if (attempt < retries && this.isRetryable(err)) {
-          await sleep(DISCOVERY_RETRY_DELAY_MS * 2 ** attempt);
+        if (attempt < this.retries && this.isRetryable(err)) {
+          await sleep(RETRY_DELAY_MS * 2 ** attempt);
           continue;
         }
         if (err.code === "ECONNABORTED" || err.code === "ETIMEDOUT") {
@@ -326,10 +339,9 @@ export class ThothIdSDK {
   private async getValidated<T extends ZodType>(
     url: string,
     responseSchema: T,
-    context: string,
-    retries = 0
+    context: string
   ): Promise<z.infer<T>> {
-    const json = await this.fetchJson(url, retries);
+    const json = await this.fetchJson(url);
 
     // The node also reports failures with a 200 body of `{ success: false }`.
     const nodeError = schemas.NodeErrorResponseSchema.safeParse(json);
@@ -582,6 +594,24 @@ export class ThothIdSDK {
   }
 
   async callMultiple(calls: { method: string; params?: any[] }[], domainSuffix: string): Promise<any[]> {
+    const results = await this.callMultipleSettled(calls, domainSuffix);
+
+    return results.map((result, i) => {
+        if (!result.ok) {
+            throw new Error(`Smart contract error in method ${this.buildCallString(calls[i].method, calls[i].params)}: ${result.error}`);
+        }
+        return result.value;
+    });
+  }
+
+  /**
+   * Like `callMultiple`, but a failing call does not sink the batch: each call
+   * gets its own `{ ok, value }` or `{ ok, error }`, in the order given. The
+   * node already evaluates every call independently, so one invalid address
+   * only fails its own entry. Only a failure of the request itself (after
+   * retries) rejects the whole promise.
+   */
+  async callMultipleSettled(calls: { method: string; params?: any[] }[], domainSuffix: string): Promise<CallResult[]> {
     const id = await this._getContractIdFromSuffix(domainSuffix);
 
     const callStrings = calls.map(c => this.buildCallString(c.method, c.params));
@@ -590,12 +620,12 @@ export class ThothIdSDK {
 
     const json = await this.getValidated(url, schemas.ApiResponseSchema, "nano contract state");
 
-    return callStrings.map(cs => {
+    return callStrings.map((cs): CallResult => {
         const result = json.calls[cs];
         if (result?.errmsg) {
-            throw new Error(`Smart contract error in method ${cs}: ${result.errmsg}`);
+            return { ok: false, error: result.errmsg };
         }
-        return result ? result.value : undefined;
+        return { ok: true, value: result ? result.value : undefined };
     });
   }
 }

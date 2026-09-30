@@ -18,7 +18,24 @@ export type ThothSDKOptions = {
    */
   contractIds?: ContractIdMap;
   timeoutMs?: number;
+  /**
+   * Headers sent with every request to the node, e.g. an API key for a
+   * private node. Entries whose value is `undefined` are dropped, so an unset
+   * environment variable simply sends nothing.
+   */
+  headers?: Record<string, string | undefined>;
+  /**
+   * How many times a request is retried after a rate limit (`429`), a
+   * transient gateway error (`502`/`503`/`504`), a timeout or a dropped
+   * connection. Applies to discovery and view calls alike. Defaults to 3.
+   */
+  retries?: number;
 };
+
+/** Outcome of one call in `callMultipleSettled`, like `Promise.allSettled`. */
+export type CallResult =
+  | { ok: true; value: any }
+  | { ok: false; error: string };
 
 export { ThothIdSDK, DEFAULT_BLUEPRINT_ID, DEFAULT_NODE_URL };
 export default ThothIdSDK;

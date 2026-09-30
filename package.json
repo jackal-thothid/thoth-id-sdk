@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest tests/sdk.test.ts",
+    "test": "jest tests/sdk.local.test.ts tests/sdk.test.ts",
     "test:verbose": "jest tests/sdk.verbose.test.ts"
   },
   "keywords": [

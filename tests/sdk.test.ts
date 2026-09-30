@@ -298,5 +298,30 @@ describe('ThothIdSDK on testnet', () => {
 
       expect(contractDomain).toBe(await sdk.getContractDomain(domain.suffix));
     }, TIMEOUT);
+
+    it('should fail the whole batch when one call fails', async () => {
+      const [domain] = domains;
+      await expect(sdk.callMultiple([
+        { method: 'get_manager_primary_name', params: [domain.devAddress] },
+        { method: 'get_manager_primary_name', params: ['notanaddress'] },
+      ], domain.suffix)).rejects.toThrow('InvalidAddress');
+    }, TIMEOUT);
+  });
+
+  describe('callMultipleSettled', () => {
+    it('should isolate an invalid address to its own result', async () => {
+      const [domain] = domains;
+      const results = await sdk.callMultipleSettled([
+        { method: 'get_manager_primary_name', params: [domain.devAddress] },
+        { method: 'get_manager_primary_name', params: ['notanaddress'] },
+        { method: 'get_grace_period_days' },
+      ], domain.suffix);
+
+      expect(results).toEqual([
+        { ok: true, value: domain.primaryName },
+        { ok: false, error: expect.stringContaining('InvalidAddress') },
+        { ok: true, value: settings.gracePeriodDays },
+      ]);
+    }, TIMEOUT);
   });
 });
