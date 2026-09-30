@@ -57,6 +57,43 @@ async function getSdk() {
 }
 ```
 
+### Private nodes
+
+Pass `headers` to authenticate against a node that needs it — they are sent with every request, discovery included. A header whose value is `undefined` is left out:
+
+```typescript
+const sdk = new ThothIdSDK({
+  nodeUrl: "https://node.testnet.dozer.finance/v1a/nano_contract/state",
+  headers: { "X-API-Key": process.env.NODE_API_KEY },
+});
+```
+
+In a browser, custom headers trigger a CORS preflight, so the node must allow them.
+
+### Retries
+
+Every request — discovery and view calls alike — is retried on `429`, `502`, `503`, `504`, timeouts and dropped connections, with exponential backoff (1s, 2s, 4s, …). Set how many times with `retries` (default `3`, `0` to disable):
+
+```typescript
+const sdk = new ThothIdSDK({ retries: 5 });
+```
+
+### Batching calls
+
+`callMultiple` sends several view calls in one request and throws if any of them fails. `callMultipleSettled` sends the same request but returns each call's own outcome, so one invalid address doesn't sink the rest:
+
+```typescript
+const results = await sdk.callMultipleSettled(
+  addresses.map((address) => ({ method: "get_manager_primary_name", params: [address] })),
+  "htr"
+);
+
+for (const result of results) {
+  if (result.ok) console.log(result.value);
+  else console.warn(result.error); // e.g. "InvalidAddress('Invalid checksum of address')"
+}
+```
+
 > **Upgrading from v2?** The `contractApiUrl` option and `setContractApiUrl()` are gone, and
 > `loadContractIds()` is no longer required — it now returns the map it collected and happens
 > automatically on first use. See the migration guide in the documentation.
@@ -66,7 +103,7 @@ async function getSdk() {
 ```bash
 npm install
 npm run build
-npm test            # runs against the public Hathor testnet
+npm test            # a local suite, then the public Hathor testnet
 npm run test:verbose
 ```
 
