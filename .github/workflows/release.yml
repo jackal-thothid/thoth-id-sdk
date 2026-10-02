@@ -1,20 +1,35 @@
 name: Release and Publish to npm
 
+# Runs after a pull request is merged into main. `main` is protected, so this
+# workflow never pushes commits to it: the version published to npm is the
+# source of truth, the next one is computed from it, written to package.json
+# only inside the runner, and recorded in git as a tag (tags are not covered by
+# branch protection).
+
 on:
   push:
     branches: [ main ]
+    # CI-only changes never release, even with a release keyword. A merge that
+    # also touches anything else still runs.
+    paths-ignore:
+      - '.github/**'
+
+# Two merges in a row must not compute the same next version.
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   test:
     uses: ./.github/workflows/test-suite.yml
 
   release:
-    name: Build and Publish
+    name: Tag and Publish
     needs: test
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write
+      contents: write # push the version tag
 
     steps:
       - name: Checkout code
@@ -28,15 +43,14 @@ jobs:
           node-version: '18'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Install dependencies
-        run: npm ci
-
+      # The keyword comes from the merge commit, which carries the pull request
+      # title, so put [major]/[minor]/[patch] in the PR title.
       - name: Determine version bump and release condition
         id: version_info
         run: |
           commit_message=$(git log -1 --pretty=%B)
           should_release="false"
-          bump="patch" # Default bump, will only be used if should_release is true
+          bump="patch"
           if [[ "$commit_message" == *"[major]"* || "$commit_message" == *"[breaking change]"* ]]; then
             bump="major"
             should_release="true"
@@ -57,32 +71,51 @@ jobs:
           echo "bump=$bump" >> $GITHUB_OUTPUT
           echo "should_release=$should_release" >> $GITHUB_OUTPUT
 
+      # Bumped from what npm actually serves, not from package.json or the
+      # latest tag: if a previous run published but failed to push its tag,
+      # the next run still moves forward instead of re-publishing a version.
+      - name: Compute next version
+        if: steps.version_info.outputs.should_release == 'true'
+        id: next_version
+        run: |
+          name=$(node -p "require('./package.json').name")
+          current=$(npm view "$name" version 2>/dev/null || echo "0.0.0")
+          IFS=. read -r major minor patch <<< "${current%%-*}"
+          case "${{ steps.version_info.outputs.bump }}" in
+            major) major=$((major + 1)); minor=0; patch=0 ;;
+            minor) minor=$((minor + 1)); patch=0 ;;
+            patch) patch=$((patch + 1)) ;;
+          esac
+          next="$major.$minor.$patch"
+          if git rev-parse -q --verify "refs/tags/v$next" >/dev/null; then
+            echo "Tag v$next already exists but $name@$next is not on npm. Fix the tag or publish it manually."
+            exit 1
+          fi
+          echo "Published: $current -> releasing: $next"
+          echo "version=$next" >> $GITHUB_OUTPUT
+
+      - name: Install dependencies
+        if: steps.version_info.outputs.should_release == 'true'
+        run: npm ci
+
       - name: Build project
         if: steps.version_info.outputs.should_release == 'true'
         run: npm run build
 
-      - name: Configure Git
+      # Only the runner's copy changes; nothing is committed.
+      - name: Set package version
         if: steps.version_info.outputs.should_release == 'true'
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-
-      - name: Bump version and create tag
-        if: steps.version_info.outputs.should_release == 'true'
-        id: bump_version
-        run: |
-          new_version=$(npm version ${{ steps.version_info.outputs.bump }} --no-git-tag-version)
-          echo "new_version=$new_version" >> $GITHUB_OUTPUT
-          git add package.json package-lock.json
-          git commit -m "chore(release): ${new_version}"
-          git tag ${new_version}
-
-      - name: Push changes back to main
-        if: steps.version_info.outputs.should_release == 'true'
-        run: git push && git push --tags
+        run: npm version "${{ steps.next_version.outputs.version }}" --no-git-tag-version --allow-same-version
 
       - name: Publish to npm
         if: steps.version_info.outputs.should_release == 'true'
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Tag the release
+        if: steps.version_info.outputs.should_release == 'true'
+        run: |
+          tag="v${{ steps.next_version.outputs.version }}"
+          git tag "$tag" "$GITHUB_SHA"
+          git push origin "$tag"
