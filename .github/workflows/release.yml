@@ -30,6 +30,7 @@ jobs:
 
     permissions:
       contents: write # push the version tag
+      id-token: write # npm trusted publishing (OIDC), no npm token needed
 
     steps:
       - name: Checkout code
@@ -40,7 +41,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          # Trusted publishing needs npm >= 11.5.1, which Node 24 ships.
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
       # The keyword comes from the merge commit, which carries the pull request
@@ -107,11 +109,11 @@ jobs:
         if: steps.version_info.outputs.should_release == 'true'
         run: npm version "${{ steps.next_version.outputs.version }}" --no-git-tag-version --allow-same-version
 
+      # Authenticated through the trusted publisher configured on npmjs.com
+      # for this repository and workflow file; provenance is attached as well.
       - name: Publish to npm
         if: steps.version_info.outputs.should_release == 'true'
         run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Tag the release
         if: steps.version_info.outputs.should_release == 'true'
