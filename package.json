@@ -1,15 +1,19 @@
 {
   "name": "thoth-id-sdk",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "Sdk to consult @view methods of the ThothNamer nano contracts on Hathor testnet and mainnet",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "test": "jest --runInBand tests/sdk.local.test.ts tests/sdk.test.ts",
     "test:testnet": "THOTH_NETWORK=testnet jest tests/sdk.test.ts",
     "test:mainnet": "THOTH_NETWORK=mainnet jest tests/sdk.test.ts",
-    "test:verbose": "jest tests/sdk.verbose.test.ts"
+    "test:verbose": "jest tests/sdk.verbose.test.ts",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "thoth",
@@ -21,6 +25,10 @@
   ],
   "author": "Jackal thoth-id",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jackal-thothid/thoth-id-sdk.git"
+  },
   "dependencies": {
     "axios": "1.7.7",
     "bs58": "^5.0.0",

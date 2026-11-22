@@ -529,7 +529,7 @@ export class ThothIdSDK {
     if (!id) throw new Error("contractId is required.");
 
     const callStr = this.buildCallString(methodName, params);
-    const url = `${this.nodeEndpoint("state")}?id=${encodeURIComponent(id)}&calls[]=${encodeURIComponent(callStr)}`;
+    const url = `${this.nodeEndpoint("state")}?id=${encodeURIComponent(id)}&calls%5B%5D=${encodeURIComponent(callStr)}`;
 
     const json = await this.getValidated(url, schemas.ApiResponseSchema, "nano contract state");
     const result = json.calls[callStr];
@@ -763,7 +763,7 @@ export class ThothIdSDK {
     const id = await this._getContractIdFromSuffix(domainSuffix);
 
     const callStrings = calls.map(c => this.buildCallString(c.method, c.params));
-    const queryParts = callStrings.map(cs => `calls[]=${encodeURIComponent(cs)}`);
+    const queryParts = callStrings.map(cs => `calls%5B%5D=${encodeURIComponent(cs)}`);
     const url = `${this.nodeEndpoint("state")}?id=${encodeURIComponent(id)}&${queryParts.join("&")}`;
 
     const json = await this.getValidated(url, schemas.ApiResponseSchema, "nano contract state");
