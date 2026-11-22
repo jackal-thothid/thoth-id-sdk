@@ -1,4 +1,10 @@
-import { ThothIdSDK } from '../src/index';
+import {
+  ThothIdSDK,
+  DEFAULT_BLUEPRINT_ID,
+  DEFAULT_NODE_URL,
+  MAINNET_BLUEPRINT_IDS,
+  MAINNET_NODE_URL,
+} from '../src/index';
 import * as http from 'http';
 import { AddressInfo } from 'net';
 
@@ -73,8 +79,10 @@ describe('custom headers', () => {
       const { pathname } = new URL(req.url!, baseUrl);
       if (pathname.endsWith('/creation')) {
         json(res, 200, { success: true, nc_creation_txs: [{ nano_contract_id: CONTRACT_ID }], has_more: false });
-      } else {
+      } else if (pathname.endsWith('/history')) {
         json(res, 200, { success: true, history: [{ nc_method: 'initialize', nc_args_decoded: ['htr'] }] });
+      } else {
+        json(res, 200, { success: true, blueprint_id: DEFAULT_BLUEPRINT_ID, calls: {} });
       }
     };
     const sdk = new ThothIdSDK({
@@ -83,7 +91,7 @@ describe('custom headers', () => {
     });
 
     await expect(sdk.loadContractIds()).resolves.toEqual({ htr: CONTRACT_ID });
-    expect(requests).toHaveLength(2);
+    expect(requests).toHaveLength(3);
     for (const req of requests) {
       expect(req.headers['x-api-key']).toBe('secret');
     }
@@ -159,5 +167,210 @@ describe('callMultipleSettled', () => {
       { ok: true, value: 30 },
     ]);
     expect(requests).toHaveLength(1);
+  }, TIMEOUT);
+});
+
+describe('networks', () => {
+  it('defaults to testnet', () => {
+    const sdk = new ThothIdSDK();
+
+    expect(sdk.network).toBe('testnet');
+    expect(sdk.nodeUrl).toBe(DEFAULT_NODE_URL);
+    expect(sdk.blueprintIds).toEqual([DEFAULT_BLUEPRINT_ID]);
+    expect(sdk.blueprintId).toBe(DEFAULT_BLUEPRINT_ID);
+  });
+
+  it('uses the mainnet node and every mainnet blueprint', () => {
+    const sdk = new ThothIdSDK({ network: 'mainnet' });
+
+    expect(sdk.network).toBe('mainnet');
+    expect(sdk.nodeUrl).toBe(MAINNET_NODE_URL);
+    expect(sdk.blueprintIds).toEqual(MAINNET_BLUEPRINT_IDS);
+  });
+
+  it('lets explicit options override the network defaults', () => {
+    const sdk = new ThothIdSDK({ network: 'mainnet', nodeUrl: 'http://my-node', blueprintId: 'ab' });
+
+    expect(sdk.nodeUrl).toBe('http://my-node');
+    expect(sdk.blueprintIds).toEqual(['ab']);
+    expect(new ThothIdSDK({ blueprintIds: ['a', 'b'], blueprintId: 'c' }).blueprintIds).toEqual(['a', 'b']);
+  });
+
+  it('rejects an unknown network', () => {
+    expect(() => new ThothIdSDK({ network: 'devnet' as any })).toThrow('Unknown network "devnet"');
+  });
+
+  it('rejects an empty blueprint list', () => {
+    expect(() => new ThothIdSDK({ blueprintIds: [] })).toThrow('At least one blueprint ID');
+  });
+
+  it('switches network and drops the map', () => {
+    const sdk = new ThothIdSDK({ contractIds: { htr: CONTRACT_ID } });
+    sdk.setNetwork('mainnet');
+
+    expect(sdk.nodeUrl).toBe(MAINNET_NODE_URL);
+    expect(sdk.blueprintIds).toEqual(MAINNET_BLUEPRINT_IDS);
+    expect(sdk.getDomains()).toEqual([]);
+  });
+});
+
+describe('discovery across blueprint versions', () => {
+  const OLD = '11'.repeat(32);
+  const NEW = '22'.repeat(32);
+  const id = (n: number) => String(n).padStart(64, '0');
+
+  /**
+   * `creations[blueprint]` lists that blueprint's contracts and `domains[id]`
+   * their domain. A contract runs its creation blueprint unless `current[id]`
+   * says it was upgraded to another one.
+   */
+  function nodeWith(
+    creations: Record<string, Array<{ nano_contract_id: string; created_at?: number }>>,
+    domains: Record<string, string>,
+    current: Record<string, string> = {}
+  ): Handler {
+    return (req, res) => {
+      const url = new URL(req.url!, baseUrl);
+      const id = url.searchParams.get('id')!;
+      if (url.pathname.endsWith('/creation')) {
+        json(res, 200, { success: true, nc_creation_txs: creations[url.searchParams.get('search')!] ?? [], has_more: false });
+      } else if (url.pathname.endsWith('/history')) {
+        json(res, 200, { success: true, history: [{ nc_method: 'initialize', nc_args_decoded: [domains[id]] }] });
+      } else {
+        const createdFrom = Object.keys(creations).find((bp) => creations[bp].some((tx) => tx.nano_contract_id === id));
+        json(res, 200, { success: true, blueprint_id: current[id] ?? createdFrom, calls: {} });
+      }
+    };
+  }
+
+  function newDiscoverySdk() {
+    return new ThothIdSDK({ nodeUrl: `${baseUrl}/v1a/nano_contract/state`, blueprintIds: [OLD, NEW] });
+  }
+
+  it('searches every blueprint and merges the registries', async () => {
+    handler = nodeWith(
+      { [OLD]: [{ nano_contract_id: id(1), created_at: 100 }], [NEW]: [{ nano_contract_id: id(2), created_at: 200 }] },
+      { [id(1)]: 'htr', [id(2)]: 'tst' }
+    );
+
+    await expect(newDiscoverySdk().loadContractIds()).resolves.toEqual({ htr: id(1), tst: id(2) });
+    const searched = requests
+      .map((req) => new URL(req.url!, baseUrl))
+      .filter((url) => url.pathname.endsWith('/creation'))
+      .map((url) => url.searchParams.get('search'));
+    expect(searched).toEqual([OLD, NEW]);
+  }, TIMEOUT);
+
+  it('gives a domain to its oldest registry, whatever blueprint it came from', async () => {
+    // Listed under the newer blueprint first, but created earlier.
+    handler = nodeWith(
+      { [OLD]: [{ nano_contract_id: id(1), created_at: 300 }], [NEW]: [{ nano_contract_id: id(2), created_at: 100 }] },
+      { [id(1)]: 'htr', [id(2)]: 'htr' }
+    );
+
+    await expect(newDiscoverySdk().loadContractIds()).resolves.toEqual({ htr: id(2) });
+  }, TIMEOUT);
+
+  it('tolerates a blueprint with no contracts yet', async () => {
+    handler = nodeWith({ [OLD]: [{ nano_contract_id: id(1), created_at: 100 }] }, { [id(1)]: 'htr' });
+
+    await expect(newDiscoverySdk().loadContractIds()).resolves.toEqual({ htr: id(1) });
+  }, TIMEOUT);
+});
+
+describe('blocking registries upgraded to an untrusted blueprint', () => {
+  const TRUSTED = '11'.repeat(32);
+  const TRUSTED_NEXT = '22'.repeat(32);
+  const ROGUE = 'ee'.repeat(32);
+  const id = (n: number) => String(n).padStart(64, '0');
+
+  /** `contracts` in creation order: [id, domain, blueprint it runs now]. */
+  function nodeWith(contracts: Array<[string, string, string]>): Handler {
+    return (req, res) => {
+      const url = new URL(req.url!, baseUrl);
+      const contract = contracts.find(([cid]) => cid === url.searchParams.get('id'));
+      if (url.pathname.endsWith('/creation')) {
+        const txs = url.searchParams.get('search') === TRUSTED
+          ? contracts.map(([cid], i) => ({ nano_contract_id: cid, created_at: 100 + i }))
+          : [];
+        json(res, 200, { success: true, nc_creation_txs: txs, has_more: false });
+      } else if (url.pathname.endsWith('/history')) {
+        json(res, 200, { success: true, history: [{ nc_method: 'initialize', nc_args_decoded: [contract![1]] }] });
+      } else if (url.searchParams.getAll('calls[]').length === 0) {
+        json(res, 200, { success: true, blueprint_id: contract![2], calls: {} });
+      } else {
+        stateResponder({ 'get_contract_domain()': contract![1] })(req, res);
+      }
+    };
+  }
+
+  function newDiscoverySdk() {
+    return new ThothIdSDK({ nodeUrl: `${baseUrl}/v1a/nano_contract/state`, blueprintIds: [TRUSTED, TRUSTED_NEXT] });
+  }
+
+  it('keeps a registry upgraded to another trusted version', async () => {
+    handler = nodeWith([[id(1), 'htr', TRUSTED_NEXT]]);
+    const sdk = newDiscoverySdk();
+
+    await expect(sdk.loadContractIds()).resolves.toEqual({ htr: id(1) });
+    expect(sdk.getBlockedDomains()).toEqual({});
+    await expect(sdk.getContractDomain('htr')).resolves.toBe('htr');
+  }, TIMEOUT);
+
+  it('blocks a domain whose first registry now runs an untrusted blueprint', async () => {
+    handler = nodeWith([[id(1), 'xyz', ROGUE]]);
+    const sdk = newDiscoverySdk();
+
+    await expect(sdk.loadContractIds()).resolves.toEqual({});
+    expect(sdk.getBlockedDomains()).toEqual({ xyz: { contractId: id(1), blueprintId: ROGUE } });
+    await expect(sdk.resolveName('alice.xyz')).rejects.toThrow(
+      `the ".xyz" domain is registered by contract ${id(1)}, which now runs blueprint ${ROGUE}`
+    );
+  }, TIMEOUT);
+
+  it('does not hand a blocked domain to the next contract claiming it', async () => {
+    handler = nodeWith([
+      [id(1), 'xyz', ROGUE],
+      [id(2), 'xyz', TRUSTED],
+      [id(3), 'htr', TRUSTED],
+    ]);
+    const sdk = newDiscoverySdk();
+
+    await expect(sdk.loadContractIds()).resolves.toEqual({ htr: id(3) });
+    expect(sdk.getBlockedDomains()).toEqual({ xyz: { contractId: id(1), blueprintId: ROGUE } });
+  }, TIMEOUT);
+
+  it('checks the current blueprint of first claimants only', async () => {
+    handler = nodeWith([
+      [id(1), 'htr', TRUSTED],
+      [id(2), 'htr', ROGUE],
+    ]);
+    const sdk = newDiscoverySdk();
+
+    await expect(sdk.loadContractIds()).resolves.toEqual({ htr: id(1) });
+    // The later `htr` claim loses on age, so its blueprint is never asked for.
+    expect(sdk.getBlockedDomains()).toEqual({});
+    const stateRequests = requests.filter((req) => new URL(req.url!, baseUrl).pathname.endsWith('/state'));
+    expect(stateRequests.map((req) => new URL(req.url!, baseUrl).searchParams.get('id'))).toEqual([id(1)]);
+  }, TIMEOUT);
+
+  it('trusts a blueprint once it is added to blueprintIds', async () => {
+    handler = nodeWith([[id(1), 'xyz', ROGUE]]);
+    const sdk = new ThothIdSDK({
+      nodeUrl: `${baseUrl}/v1a/nano_contract/state`,
+      blueprintIds: [TRUSTED, TRUSTED_NEXT, ROGUE],
+    });
+
+    await expect(sdk.loadContractIds()).resolves.toEqual({ xyz: id(1) });
+    expect(sdk.getBlockedDomains()).toEqual({});
+  }, TIMEOUT);
+
+  it('forgets blocked domains when the map is replaced', async () => {
+    handler = nodeWith([[id(1), 'xyz', ROGUE]]);
+    const sdk = newDiscoverySdk();
+    await sdk.loadContractIds();
+
+    sdk.setContractIds({ htr: id(9) });
+    expect(sdk.getBlockedDomains()).toEqual({});
   }, TIMEOUT);
 });

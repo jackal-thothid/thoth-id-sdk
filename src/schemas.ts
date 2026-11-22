@@ -43,6 +43,12 @@ export const NanoContractHistoryResponseSchema = z.object({
   history: z.array(NanoContractHistoryTxSchema),
 }).loose();
 
+// `GET /v1a/nano_contract/state?id=<ncId>` with no calls: just the blueprint the
+// contract runs *now*, which an upgrade changes.
+export const NanoContractStateSchema = z.object({
+  blueprint_id: z.string(),
+}).loose();
+
 // The node reports handled failures as `{ success: false, error: "..." }`.
 export const NodeErrorResponseSchema = z.object({
   success: z.literal(false),

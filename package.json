@@ -1,12 +1,14 @@
 {
   "name": "thoth-id-sdk",
   "version": "3.1.0",
-  "description": "Sdk to consult @view methods of ThothNamer nanocontract",
+  "description": "Sdk to consult @view methods of the ThothNamer nano contracts on Hathor testnet and mainnet",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest tests/sdk.local.test.ts tests/sdk.test.ts",
+    "test": "jest --runInBand tests/sdk.local.test.ts tests/sdk.test.ts",
+    "test:testnet": "THOTH_NETWORK=testnet jest tests/sdk.test.ts",
+    "test:mainnet": "THOTH_NETWORK=mainnet jest tests/sdk.test.ts",
     "test:verbose": "jest tests/sdk.verbose.test.ts"
   },
   "keywords": [

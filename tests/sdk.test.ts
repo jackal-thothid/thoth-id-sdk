@@ -1,37 +1,35 @@
 import { ThothIdSDK, ThothSDKOptions } from '../src/index';
-import * as fs from 'fs';
-import * as path from 'path';
+import { networks } from './networks';
 
-// These tests run straight against the public Hathor testnet. There is nothing
-// to set up: since v3 the Sdk discovers the domain registries from the node
-// itself, so the whole suite only needs a network connection.
-const configPath = path.resolve(__dirname, 'test-config.json');
-const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-const sdkOptions: ThothSDKOptions = config.sdkOptions;
-const settings = config.contractSettings;
-const domains: any[] = config.domains;
-
+// These tests run straight against the public Hathor nodes, once per network in
+// tests/config (testnet and mainnet). There is nothing to set up: since v3 the
+// Sdk discovers the domain registries from the node itself, so the whole suite
+// only needs a network connection. THOTH_NETWORK=mainnet runs a single network.
 const TIMEOUT = 30000;
 // Discovery walks the registries one request at a time because public nodes
 // rate-limit, so anything that collects a fresh map needs more room.
 const DISCOVERY_TIMEOUT = 120000;
-
-/**
- * The registries the tests require, derived from the domains they exercise.
- * Discovery has to return each of these mapped to exactly this contract — but
- * this is a lower bound, not the whole set: testnet will gain domains over
- * time, and an extra registry must not fail the suite.
- */
-const requiredRegistries: Record<string, string> = Object.fromEntries(
-  domains.map((domain) => [domain.suffix, domain.contractId])
-);
 
 /** A name nobody can have registered, so it is always available. */
 function freeName(suffix: string) {
   return `zz${Date.now()}${Math.floor(Math.random() * 1000)}.${suffix}`;
 }
 
-describe('ThothIdSDK on testnet', () => {
+describe.each(networks)('ThothIdSDK on $network', (config) => {
+  const sdkOptions: ThothSDKOptions = config.sdkOptions;
+  const settings = config.contractSettings;
+  const domains: any[] = config.domains;
+
+  /**
+   * The registries the tests require, derived from the domains they exercise.
+   * Discovery has to return each of these mapped to exactly this contract — but
+   * this is a lower bound, not the whole set: a network will gain domains over
+   * time, and an extra registry must not fail the suite.
+   */
+  const requiredRegistries: Record<string, string> = Object.fromEntries(
+    domains.map((domain) => [domain.suffix, domain.contractId])
+  );
+
   let sdk: ThothIdSDK;
 
   beforeAll(async () => {
@@ -40,11 +38,24 @@ describe('ThothIdSDK on testnet', () => {
   }, DISCOVERY_TIMEOUT);
 
   describe('contract discovery', () => {
+    it('talks to the expected network', () => {
+      expect(sdk.network).toBe(config.network);
+      expect(sdk.nodeUrl).toBe(config.expectedNodeUrl);
+    });
+
     it('discovers at least the required registries, each exactly', () => {
-      // Extra registries are expected as testnet grows, so this asserts the
+      // Extra registries are expected as the network grows, so this asserts the
       // required ones entry by entry instead of comparing the whole map.
       for (const [suffix, contractId] of Object.entries(requiredRegistries)) {
         expect(sdk.contractIds[suffix]).toBe(contractId);
+      }
+    });
+
+    it('blocks none of the required domains', () => {
+      // Every required registry runs a trusted ThothNamer version, even after
+      // an upgrade (mainnet .htr was created on v1.0 and now runs v1.1).
+      for (const suffix of Object.keys(requiredRegistries)) {
+        expect(sdk.getBlockedDomains()).not.toHaveProperty(suffix);
       }
     });
 
