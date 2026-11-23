@@ -9,5 +9,8 @@ on:
       - 'main'
 
 jobs:
-  run-test-suite:
+  # Keep this job named `test`: branch protection on main requires the check
+  # "test / Run Tests", the same name release.yml reports. Under any other name
+  # the required check never reports on a pull request and it waits forever.
+  test:
     uses: ./.github/workflows/test-suite.yml
