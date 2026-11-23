@@ -51,10 +51,11 @@ jobs:
       - name: Build
         run: npm run build
 
-      # The suite runs against the public Hathor testnet and discovers the
-      # domain registries from the node, so it needs no local environment.
-      # Public nodes rate-limit, so a run that trips over a 429 is retried.
-      - name: Run tests against testnet
+      # The suite runs against the public Hathor testnet and mainnet nodes and
+      # discovers the domain registries from them, so it needs no local
+      # environment. Public nodes rate-limit, so a run that trips over a 429 is
+      # retried.
+      - name: Run tests against testnet and mainnet
         run: |
           for i in 1 2 3; do
             echo "--- Attempt $i of 3 ---"

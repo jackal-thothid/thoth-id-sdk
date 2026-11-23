@@ -1,27 +1,10 @@
 import { ThothIdSDK, ThothSDKOptions } from '../src/index';
-import * as fs from 'fs';
-import * as path from 'path';
+import { networks } from './networks';
 
-// Same suite as sdk.test.ts, printing what it asked the testnet and what came
-// back. Run it with `npm run test:v3:verbose` when a failure needs context.
-const configPath = path.resolve(__dirname, 'test-config.json');
-const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-const sdkOptions: ThothSDKOptions = config.sdkOptions;
-const settings = config.contractSettings;
-const domains: any[] = config.domains;
-
+// Same suite as sdk.test.ts, printing what it asked each network and what came
+// back. Run it with `npm run test:verbose` when a failure needs context.
 const TIMEOUT = 30000;
 const DISCOVERY_TIMEOUT = 120000;
-
-/**
- * The registries the tests require, derived from the domains they exercise.
- * Discovery has to return each of these mapped to exactly this contract — but
- * this is a lower bound, not the whole set: testnet will gain domains over
- * time, and an extra registry must not fail the suite.
- */
-const requiredRegistries: Record<string, string> = Object.fromEntries(
-  domains.map((domain) => [domain.suffix, domain.contractId])
-);
 
 /** A name nobody can have registered, so it is always available. */
 function freeName(suffix: string) {
@@ -34,28 +17,53 @@ function log(label: string, expected: any, received: any) {
   console.log('    - Received:', received);
 }
 
-describe('ThothIdSDK on testnet', () => {
+describe.each(networks)('ThothIdSDK on $network', (config) => {
+  const sdkOptions: ThothSDKOptions = config.sdkOptions;
+  const settings = config.contractSettings;
+  const domains: any[] = config.domains;
+
+  /**
+   * The registries the tests require, derived from the domains they exercise.
+   * Discovery has to return each of these mapped to exactly this contract — but
+   * this is a lower bound, not the whole set: a network will gain domains over
+   * time, and an extra registry must not fail the suite.
+   */
+  const requiredRegistries: Record<string, string> = Object.fromEntries(
+    domains.map((domain) => [domain.suffix, domain.contractId])
+  );
+
   let sdk: ThothIdSDK;
 
   beforeAll(async () => {
-    console.log('\n=== Discovering the domain registries from the node ===');
+    console.log(`\n=== Discovering the ${config.network} domain registries from the node ===`);
     console.log('  - sdkOptions:', JSON.stringify(sdkOptions));
     sdk = new ThothIdSDK(sdkOptions);
     console.log('  - nodeUrl:', sdk.nodeUrl);
-    console.log('  - blueprintId:', sdk.blueprintId);
+    console.log('  - network:', sdk.network);
+    console.log('  - blueprintIds:', sdk.blueprintIds);
 
     const startedAt = Date.now();
     const contractIds = await sdk.loadContractIds();
     console.log(`  - collected in ${Date.now() - startedAt}ms:`, contractIds);
+    console.log('  - blocked domains:', sdk.getBlockedDomains());
     console.log('======================================================\n');
   }, DISCOVERY_TIMEOUT);
 
   describe('contract discovery', () => {
+    it('talks to the expected network', () => {
+      console.log(`\n--- Test: network (${config.network}) ---`);
+      log('network', config.network, sdk.network);
+      expect(sdk.network).toBe(config.network);
+      log('nodeUrl', config.expectedNodeUrl, sdk.nodeUrl);
+      expect(sdk.nodeUrl).toBe(config.expectedNodeUrl);
+      console.log('------------------------------\n');
+    });
+
     it('discovers at least the required registries, each exactly', () => {
       console.log('\n--- Test: discovery result ---');
       log('required registries', requiredRegistries, sdk.contractIds);
 
-      // Extra registries are expected as testnet grows, so this asserts the
+      // Extra registries are expected as the network grows, so this asserts the
       // required ones entry by entry instead of comparing the whole map.
       for (const [suffix, contractId] of Object.entries(requiredRegistries)) {
         log(`.${suffix}`, contractId, sdk.contractIds[suffix]);
@@ -65,6 +73,16 @@ describe('ThothIdSDK on testnet', () => {
       const extras = sdk.getDomains().filter((suffix) => !(suffix in requiredRegistries));
       console.log('  - Extra registries (not asserted):', extras.length > 0 ? extras : 'none');
       console.log('------------------------------\n');
+    });
+
+    it('blocks none of the required domains', () => {
+      console.log('\n--- Test: no required domain is blocked ---');
+      const blocked = sdk.getBlockedDomains();
+      for (const suffix of Object.keys(requiredRegistries)) {
+        log(`.${suffix} blocked`, false, suffix in blocked);
+        expect(blocked).not.toHaveProperty(suffix);
+      }
+      console.log('-------------------------------------------\n');
     });
 
     it('exposes the discovered domains', () => {

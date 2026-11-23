@@ -1,0 +1,60 @@
+{
+  "_comment": "Expected state of Hathor mainnet. The .htr registry was created from ThothNamer v1.0 and later upgraded to v1.1, so discovery has to search both blueprints. Update this file if the mainnet contracts change.",
+  "network": "mainnet",
+  "expectedNodeUrl": "https://node1.mainnet.hathor.network/v1a/nano_contract/state",
+  "sdkOptions": {
+    "network": "mainnet"
+  },
+  "_domains_comment": "The registries the tests require, and the lower bound of what discovery must return. Each one listed here must be discovered and must point at exactly this contract; registries added to testnet later are fine and simply ignored. Add an entry here to cover a new domain.",
+  "domains": [
+    {
+      "suffix": "htr",
+      "contractId": "000039f3a89ff6679b09f1ec89d430ff8bf0eea624daf97a877994e73fd62856",
+      "devAddress": "H93A2s655jatS1zfdMF5pwf6E4s5FHnUmh",
+      "registeredName": "jackal.htr",
+      "ownerAddress": "H93A2s655jatS1zfdMF5pwf6E4s5FHnUmh",
+      "primaryName": "vulture",
+      "_nonOwnerAddress_comment": "A well-formed mainnet address (version byte 0x28, hash 0x11 * 20) that owns nothing.",
+      "nonOwnerAddress": "H85NKRD9KEEWJS7wP5QuN2Nb5svXfnKwGK"
+    }
+  ],
+  "contractSettings": {
+    "feeStructure": {
+      "base_fee": 100000,
+      "three_length_multiplier": 20,
+      "four_length_multiplier": 10,
+      "five_plus_length_multiplier": 1,
+      "default_multiplier": 1
+    },
+    "gracePeriodDays": 30,
+    "maxProfileDataEntries": 20,
+    "maxProfileKeyLength": 50,
+    "maxProfileValueLength": 200,
+    "maxTokenSymbolLength": 5,
+    "maxTotalProfileSize": 10000,
+    "feeMultipliersByLength": {
+      "3": 20,
+      "4": 10,
+      "5": 1,
+      "10": 1
+    }
+  },
+  "validNames": [
+    "validname.htr",
+    "jackal.htr"
+  ],
+  "invalidNames": [
+    "Invalid-Name.htr",
+    "Inv@lid.htr",
+    "ab.htr",
+    "UPPER.htr",
+    "with space.htr"
+  ],
+  "feesByName": {
+    "abc.htr": 2000000,
+    "abcd.htr": 1000000,
+    "abcde.htr": 100000
+  },
+  "unknownSuffixName": "alice.nope",
+  "nameWithoutSuffix": "nosuffix"
+}

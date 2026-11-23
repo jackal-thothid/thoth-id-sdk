@@ -2,12 +2,45 @@ import axios, { AxiosInstance } from "axios";
 import { encode } from "bs58";
 import { z, ZodType } from "zod";
 import * as schemas from "./schemas";
-import { CallResult, ContractIdMap, ThothSDKOptions } from "./index";
+import { BlockedDomain, CallResult, ContractIdMap, Network, NetworkConfig, ThothSDKOptions } from "./index";
 
+/** State endpoint of the public testnet node. */
 export const DEFAULT_NODE_URL = "https://node1.testnet.hathor.network/v1a/nano_contract/state";
 
-/** Blueprint ID of the ThothNamer nano contract. */
+/** Blueprint ID of the ThothNamer nano contract on testnet. */
 export const DEFAULT_BLUEPRINT_ID = "000000009108a3ab3c24297df5e33679177fb8a051c133bcad467a8a23bf0dd3";
+
+/** State endpoint of the public mainnet node. */
+export const MAINNET_NODE_URL = "https://node1.mainnet.hathor.network/v1a/nano_contract/state";
+
+/** ThothNamer blueprint IDs on mainnet, oldest version first. */
+export const MAINNET_BLUEPRINT_IDS = [
+  "000000420ca7b70e522da7765c8c11ecc89a9e8a79d70eee49d5bdff4db03e92", // v1.0
+  "00000020324712abca4e3de7f25c05825808b9a3dd9aeb5b7cfe89a892203183", // v1.1
+];
+
+/** Network used when none is given. */
+export const DEFAULT_NETWORK: Network = "testnet";
+
+/** What each network brings by default. */
+export const NETWORKS: Readonly<Record<Network, Readonly<NetworkConfig>>> = {
+  testnet: { nodeUrl: DEFAULT_NODE_URL, blueprintIds: [DEFAULT_BLUEPRINT_ID] },
+  mainnet: { nodeUrl: MAINNET_NODE_URL, blueprintIds: MAINNET_BLUEPRINT_IDS },
+};
+
+function networkConfig(network: Network): Readonly<NetworkConfig> {
+  if (!Object.prototype.hasOwnProperty.call(NETWORKS, network)) {
+    throw new Error(`Unknown network "${network}". Expected one of: ${Object.keys(NETWORKS).join(", ")}.`);
+  }
+  return NETWORKS[network];
+}
+
+function checkBlueprintIds(blueprintIds: string[]): string[] {
+  if (blueprintIds.length === 0) {
+    throw new Error("At least one blueprint ID is required to discover the domain registries.");
+  }
+  return [...new Set(blueprintIds)];
+}
 
 /** Creation transactions requested per page. Honoured by the node up to 100. */
 const CREATION_PAGE_SIZE = 100;
@@ -64,11 +97,24 @@ function definedHeaders(headers: ThothSDKOptions["headers"]): Record<string, str
   return defined;
 }
 
+/** A registry creation as listed by the node. */
+type CreationTx = { nanoContractId: string; createdAt?: number };
+
+/** What one discovery collects. */
+type Discovery = { contractIds: ContractIdMap; blockedDomains: Record<string, BlockedDomain> };
+
 export class ThothIdSDK {
+  network: Network;
   nodeUrl: string;
   contractId?: string | null;
-  blueprintId: string;
+  /** ThothNamer blueprint IDs searched during discovery. */
+  blueprintIds: string[];
   contractIds: ContractIdMap = {};
+  /**
+   * Domains whose first registry now runs an untrusted blueprint, keyed by
+   * suffix. Filled by discovery; names under them fail instead of resolving.
+   */
+  blockedDomains: Record<string, BlockedDomain> = {};
   timeoutMs: number;
   retries: number;
   private http: AxiosInstance;
@@ -76,9 +122,13 @@ export class ThothIdSDK {
   private discovery: Promise<ContractIdMap> | null = null;
 
   constructor(opts: ThothSDKOptions = {}) {
-    this.nodeUrl = opts.nodeUrl ?? DEFAULT_NODE_URL;
+    this.network = opts.network ?? DEFAULT_NETWORK;
+    const preset = networkConfig(this.network);
+    this.nodeUrl = opts.nodeUrl ?? preset.nodeUrl;
     this.contractId = opts.contractId ?? null;
-    this.blueprintId = opts.blueprintId ?? DEFAULT_BLUEPRINT_ID;
+    this.blueprintIds = checkBlueprintIds(
+      opts.blueprintIds ?? (opts.blueprintId ? [opts.blueprintId] : [...preset.blueprintIds])
+    );
     this.timeoutMs = opts.timeoutMs ?? 15000;
     this.retries = opts.retries ?? DEFAULT_RETRIES;
 
@@ -117,8 +167,9 @@ export class ThothIdSDK {
   async loadContractIds(): Promise<ContractIdMap> {
     if (!this.discovery) {
       this.discovery = this.collectContractIds().then(
-        (contractIds) => {
+        ({ contractIds, blockedDomains }) => {
           this.contractIds = contractIds;
+          this.blockedDomains = blockedDomains;
           return contractIds;
         },
         (error) => {
@@ -143,6 +194,7 @@ export class ThothIdSDK {
    */
   setContractIds(contractIds: ContractIdMap): void {
     this.contractIds = normalizeContractIds(contractIds);
+    this.blockedDomains = {};
     this.discovery = Promise.resolve(this.contractIds);
   }
 
@@ -156,16 +208,35 @@ export class ThothIdSDK {
     return Object.keys(this.contractIds);
   }
 
+  /** Domains discovery refused to resolve, with the contract and blueprint that caused it. */
+  getBlockedDomains(): Record<string, BlockedDomain> {
+    const copy: Record<string, BlockedDomain> = {};
+    for (const [domain, blocked] of Object.entries(this.blockedDomains)) {
+      copy[domain] = { ...blocked };
+    }
+    return copy;
+  }
+
   /** Cached contract ID of a domain suffix, without triggering discovery. */
   getContractIdForDomain(domainSuffix: string): string | undefined {
     return this.contractIds[domainSuffix.toLowerCase()];
   }
 
   /**
-   * Every registry is a nano contract created from the ThothNamer blueprint, so
+   * Every registry is a nano contract created from a ThothNamer blueprint, so
    * the map is rebuilt by listing those creations and reading the domain each
    * one registered. When two contracts claim the same domain the oldest one
-   * wins, which is the domain's first registry.
+   * wins, which is the domain's first registry — across every blueprint
+   * version, since an upgraded contract stays listed under the blueprint it was
+   * created from.
+   *
+   * Creation alone is not enough to trust a registry: whoever creates a
+   * contract can later upgrade it to any code. So the first registry of each
+   * domain is also checked for the blueprint it runs *now*, and if that is not
+   * one of `blueprintIds` the domain is blocked. It is not handed to the next
+   * contract claiming it either — that would let a later, different registry
+   * take over the domain silently. Only first claimants are checked, so this
+   * costs one extra request per domain, not per contract.
    *
    * Requests go out one at a time: public nodes rate-limit hard, and skipping a
    * contract is not a harmless gap here. If the oldest registry of a domain
@@ -174,54 +245,99 @@ export class ThothIdSDK {
    * contract. So a contract that cannot be read fails the whole collection
    * rather than quietly reshaping the map.
    */
-  private async collectContractIds(): Promise<ContractIdMap> {
-    const nanoContractIds = await this.fetchCreationTxIds();
+  private async collectContractIds(): Promise<Discovery> {
+    const nanoContractIds = await this.fetchAllCreationTxIds();
     const contractIds: ContractIdMap = {};
+    const blockedDomains: Record<string, BlockedDomain> = {};
 
     for (const nanoContractId of nanoContractIds) {
       const domain = await this.fetchDomainForContract(nanoContractId);
-      // Creations are listed oldest first, so the first hit for a domain wins.
-      if (domain && !(domain in contractIds)) {
+      // Creations are listed oldest first, so the first claim of a domain
+      // decides it, whether that registry is trusted or blocked.
+      if (!domain || domain in contractIds || domain in blockedDomains) {
+        continue;
+      }
+
+      const blueprintId = await this.fetchCurrentBlueprint(nanoContractId);
+      if (this.blueprintIds.includes(blueprintId)) {
         contractIds[domain] = nanoContractId;
+      } else {
+        blockedDomains[domain] = { contractId: nanoContractId, blueprintId };
       }
     }
 
-    return contractIds;
+    return { contractIds, blockedDomains };
   }
 
-  /** Lists every nano contract created from the blueprint, oldest first. */
-  private async fetchCreationTxIds(): Promise<string[]> {
+  /** Blueprint a contract runs now, which differs from its creation one after an upgrade. */
+  private async fetchCurrentBlueprint(nanoContractId: string): Promise<string> {
+    const url = `${this.nodeEndpoint("state")}?id=${encodeURIComponent(nanoContractId)}`;
+    const response = await this.getValidated(url, schemas.NanoContractStateSchema, "nano contract state");
+    return response.blueprint_id;
+  }
+
+  /**
+   * Lists every nano contract created from any of the blueprints, oldest first.
+   * Each blueprint's list is already in creation order; merging them orders by
+   * `created_at`, and a stable sort keeps the node's order for any entry that
+   * lacks one.
+   */
+  private async fetchAllCreationTxIds(): Promise<string[]> {
+    const creations: CreationTx[] = [];
+    for (const blueprintId of this.blueprintIds) {
+      creations.push(...(await this.fetchCreationTxs(blueprintId)));
+    }
+
+    if (this.blueprintIds.length > 1) {
+      creations.sort((a, b) => {
+        if (a.createdAt === undefined || b.createdAt === undefined) {
+          return 0;
+        }
+        return a.createdAt - b.createdAt;
+      });
+    }
+
+    const seen = new Set<string>();
+    return creations
+      .map((tx) => tx.nanoContractId)
+      .filter((id) => !seen.has(id) && Boolean(seen.add(id)));
+  }
+
+  /** Lists every nano contract created from one blueprint, oldest first. */
+  private async fetchCreationTxs(blueprintId: string): Promise<CreationTx[]> {
     const baseUrl =
-      `${this.nodeEndpoint("creation")}?search=${encodeURIComponent(this.blueprintId)}` +
+      `${this.nodeEndpoint("creation")}?search=${encodeURIComponent(blueprintId)}` +
       `&order=asc&count=${CREATION_PAGE_SIZE}`;
 
-    const nanoContractIds: string[] = [];
+    const creations: CreationTx[] = [];
     const seen = new Set<string>();
     let after: string | null = null;
 
     for (let page = 0; page < MAX_CREATION_PAGES; page++) {
-      const url = after ? `${baseUrl}&after=${encodeURIComponent(after)}` : baseUrl;
+      const url: string = after ? `${baseUrl}&after=${encodeURIComponent(after)}` : baseUrl;
       const response = await this.getValidated(
         url,
         schemas.NanoContractCreationResponseSchema,
         "nano contract creation"
       );
 
-      const pageIds: string[] = response.nc_creation_txs.map((tx) => tx.nano_contract_id);
-      const newIds: string[] = pageIds.filter((id) => !seen.has(id));
-      newIds.forEach((id) => seen.add(id));
-      nanoContractIds.push(...newIds);
+      const pageTxs = response.nc_creation_txs;
+      const newTxs = pageTxs.filter((tx) => !seen.has(tx.nano_contract_id));
+      for (const tx of newTxs) {
+        seen.add(tx.nano_contract_id);
+        creations.push({ nanoContractId: tx.nano_contract_id, createdAt: tx.created_at });
+      }
 
       // Stop when the node says there is nothing left, and also when a page
       // adds nothing new so a repeated page cannot spin forever.
-      if (!response.has_more || newIds.length === 0) {
-        return nanoContractIds;
+      if (!response.has_more || newTxs.length === 0) {
+        return creations;
       }
-      after = pageIds[pageIds.length - 1];
+      after = pageTxs[pageTxs.length - 1].nano_contract_id;
     }
 
     throw new Error(
-      `Contract discovery aborted after ${MAX_CREATION_PAGES} pages of creation transactions for blueprint ${this.blueprintId}.`
+      `Contract discovery aborted after ${MAX_CREATION_PAGES} pages of creation transactions for blueprint ${blueprintId}.`
     );
   }
 
@@ -263,6 +379,18 @@ export class ThothIdSDK {
 
   // --- Configuration -------------------------------------------------------
 
+  /**
+   * Switches to another network's node and blueprints. Registries live on one
+   * network only, so the map is dropped.
+   */
+  setNetwork(network: Network) {
+    const preset = networkConfig(network);
+    this.network = network;
+    this.nodeUrl = preset.nodeUrl;
+    this.blueprintIds = [...preset.blueprintIds];
+    this.invalidateContractIds();
+  }
+
   /** Changing the node points at another network, so the map is dropped. */
   setNodeUrl(url: string) {
     this.nodeUrl = url;
@@ -271,14 +399,29 @@ export class ThothIdSDK {
 
   setContractId(id: string) { this.contractId = id; }
 
-  /** Changing the blueprint changes which registries exist, so the map is dropped. */
-  setBlueprintId(id: string) {
-    this.blueprintId = id;
+  /** Changing the blueprints changes which registries exist, so the map is dropped. */
+  setBlueprintIds(ids: string[]) {
+    this.blueprintIds = checkBlueprintIds(ids);
     this.invalidateContractIds();
+  }
+
+  /** Single-blueprint shorthand for `setBlueprintIds`. */
+  setBlueprintId(id: string) {
+    this.setBlueprintIds([id]);
+  }
+
+  /** First blueprint searched; kept for v3.0 callers. Prefer `blueprintIds`. */
+  get blueprintId(): string {
+    return this.blueprintIds[0];
+  }
+
+  set blueprintId(id: string) {
+    this.setBlueprintId(id);
   }
 
   private invalidateContractIds() {
     this.contractIds = {};
+    this.blockedDomains = {};
     this.discovery = null;
   }
 
@@ -424,9 +567,14 @@ export class ThothIdSDK {
       return this.contractIds[suffix];
     }
 
+    const blocked = this.blockedDomains[suffix];
+    if (blocked) {
+      throw new Error(`Refusing to resolve "${name}": the ".${suffix}" domain is registered by contract ${blocked.contractId}, which now runs blueprint ${blocked.blueprintId} — not a trusted ThothNamer version on ${this.network} (${this.blueprintIds.join(", ")}). If that blueprint is a new ThothNamer release, update the Sdk or add it to blueprintIds.`);
+    }
+
     // 3. If all else fails, throw an error
     const known = this.getDomains().join(", ") || "none";
-    throw new Error(`Could not determine contract ID for name "${name}". No nano contract created from blueprint ${this.blueprintId} registers the ".${suffix}" domain. Known domains: ${known}. Call refreshContractIds() if the domain was created after the map was collected.`);
+    throw new Error(`Could not determine contract ID for name "${name}". No nano contract created from blueprint ${this.blueprintIds.join(" or ")} on ${this.network} registers the ".${suffix}" domain. Known domains: ${known}. Call refreshContractIds() if the domain was created after the map was collected.`);
   }
 
   private _hexToBytes(hex: string): Uint8Array {

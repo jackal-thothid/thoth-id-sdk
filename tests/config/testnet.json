@@ -1,5 +1,7 @@
 {
   "_comment": "Expected state of the public Hathor testnet. These tests need no setup: they run against the live ThothNamer registries the Sdk discovers on its own. Update this file if the testnet contracts change.",
+  "network": "testnet",
+  "expectedNodeUrl": "https://node1.testnet.hathor.network/v1a/nano_contract/state",
   "sdkOptions": {},
   "_domains_comment": "The registries the tests require, and the lower bound of what discovery must return. Each one listed here must be discovered and must point at exactly this contract; registries added to testnet later are fine and simply ignored. Add an entry here to cover a new domain.",
   "domains": [
@@ -36,11 +38,29 @@
     "maxProfileValueLength": 1000,
     "maxTokenSymbolLength": 5,
     "maxTotalProfileSize": 10000,
-    "feeMultipliersByLength": { "3": 20, "4": 10, "5": 1, "10": 1 }
+    "feeMultipliersByLength": {
+      "3": 20,
+      "4": 10,
+      "5": 1,
+      "10": 1
+    }
   },
-  "validNames": ["validname.htr", "jackal.htr"],
-  "invalidNames": ["Invalid-Name.htr", "Inv@lid.htr", "ab.htr", "UPPER.htr", "with space.htr"],
-  "feesByName": { "abc.htr": 20, "abcd.htr": 10, "abcde.htr": 1 },
+  "validNames": [
+    "validname.htr",
+    "jackal.htr"
+  ],
+  "invalidNames": [
+    "Invalid-Name.htr",
+    "Inv@lid.htr",
+    "ab.htr",
+    "UPPER.htr",
+    "with space.htr"
+  ],
+  "feesByName": {
+    "abc.htr": 20,
+    "abcd.htr": 10,
+    "abcde.htr": 1
+  },
   "unknownSuffixName": "alice.nope",
   "nameWithoutSuffix": "nosuffix"
 }
