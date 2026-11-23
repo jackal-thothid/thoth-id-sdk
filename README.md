@@ -30,6 +30,7 @@ yarn add thoth-id-sdk
 ```typescript
 import { ThothIdSDK } from "thoth-id-sdk";
 
+// Testnet is the default; pass { network: "mainnet" } for mainnet
 const sdk = new ThothIdSDK();
 
 // The domain -> contract map is collected from the node on first use,
@@ -39,32 +40,72 @@ const walletAddr = await sdk.resolveName("example.htr");
 
 Every thoth.id domain is a nano contract created from a ThothNamer blueprint, and each one registers its domain in its `initialize` call. That is all the Sdk needs to build the `domain suffix -> contract ID` map itself, so there is no registry endpoint to configure and nothing to keep in sync with the chain.
 
-Collect once, use many — persist the map to skip discovery on later runs:
+Collect once, use many — persist the map to skip discovery on later runs. A map belongs to one network, so key the cache by network:
 
 ```typescript
-const CACHE_KEY = "thoth-contract-ids";
+import { ThothIdSDK, Network } from "thoth-id-sdk";
 
-async function getSdk() {
-  const cached = localStorage.getItem(CACHE_KEY);
+async function getSdk(network: Network = "testnet") {
+  const cacheKey = `thoth-contract-ids:${network}`;
+  const cached = localStorage.getItem(cacheKey);
   if (cached) {
     // Zero discovery requests
-    return new ThothIdSDK({ contractIds: JSON.parse(cached) });
+    return new ThothIdSDK({ network, contractIds: JSON.parse(cached) });
   }
 
-  const sdk = new ThothIdSDK();
+  const sdk = new ThothIdSDK({ network });
   await sdk.loadContractIds();
-  localStorage.setItem(CACHE_KEY, JSON.stringify(sdk.exportContractIds()));
+  localStorage.setItem(cacheKey, JSON.stringify(sdk.exportContractIds()));
   return sdk;
 }
+
+const mainnet = await getSdk("mainnet");
 ```
+
+> A cached map skips discovery, and with it the blocked-domain check below. Refresh it now and then with `sdk.refreshContractIds()` so a registry upgraded to an untrusted blueprint is caught.
 
 ### Networks
 
 The Sdk talks to **testnet** unless told otherwise. Pass `network: "mainnet"` to use the public mainnet node and the mainnet ThothNamer blueprints:
 
 ```typescript
+import { ThothIdSDK } from "thoth-id-sdk";
+
 const sdk = new ThothIdSDK({ network: "mainnet" });
-await sdk.resolveName("jackal.htr");
+
+await sdk.resolveName("jackal.htr");      // "H93A2s655jatS1zfdMF5pwf6E4s5FHnUmh"
+await sdk.checkNameStatus("jackal.htr");  // "active"
+await sdk.isNameAvailable("jackal.htr");  // false
+
+// Registration fee, in the token's smallest unit (100000 = 1,000.00 HTR)
+await sdk.calculateFee("abcde.htr");      // 100000
+await sdk.calculateFee("abc.htr");        // 2000000 — short names cost more
+
+// Reverse lookup: the primary name of an address on .htr
+await sdk.getManagerPrimaryName("H93A2s655jatS1zfdMF5pwf6E4s5FHnUmh", "htr"); // "vulture"
+```
+
+Batch lookups work the same way. With `callMultipleSettled` an invalid address fails only its own entry:
+
+```typescript
+const results = await sdk.callMultipleSettled(
+  ["H93A2s655jatS1zfdMF5pwf6E4s5FHnUmh", "notanaddress"].map((address) => ({
+    method: "get_manager_primary_name",
+    params: [address],
+  })),
+  "htr"
+);
+// [
+//   { ok: true, value: "vulture" },
+//   { ok: false, error: "InvalidAddress('Address size must have 25 bytes')" }
+// ]
+```
+
+Mainnet addresses start with `H`, testnet ones with `W`, and each network has its own registries — a name registered on testnet does not exist on mainnet. An app that serves both can keep one instance per network, or switch an existing one:
+
+```typescript
+const sdk = new ThothIdSDK();  // testnet
+sdk.setNetwork("mainnet");      // drops the testnet map; mainnet's is collected on next use
 ```
 
 | Network | Node | ThothNamer blueprints |
@@ -87,8 +128,6 @@ sdk.getBlockedDomains();
 ```
 
 This costs one extra request per domain. It also sets the order for shipping a new ThothNamer release: publish the blueprint, release an Sdk that lists it, and only then upgrade the registries — an older Sdk sees a registry upgraded to a blueprint it does not know as blocked. Until then an app can trust the new release itself with `blueprintIds: [...MAINNET_BLUEPRINT_IDS, "<new blueprint>"]`.
-
-A cached map belongs to one network, so key it by network when persisting it, e.g. `thoth-contract-ids:mainnet`.
 
 ### Private nodes
 
