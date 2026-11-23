@@ -9,8 +9,8 @@ on:
       - 'main'
 
 jobs:
-  # Keep this job named `test`: branch protection on main requires the check
-  # "test / Run Tests", the same name release.yml reports. Under any other name
-  # the required check never reports on a pull request and it waits forever.
-  test:
+  # Keep this job named `run-test-suite`: the ruleset on main requires the
+  # check "run-test-suite / Run Tests". Under any other name the required check
+  # never reports on a pull request and it waits forever.
+  run-test-suite:
     uses: ./.github/workflows/test-suite.yml
