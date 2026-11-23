@@ -11,7 +11,7 @@ The thoth.id Sdk provides a convenient way to interact with the thoth.id decentr
 *   Calculate registration and renewal fees.
 *   Get name ownership and profile data.
 *   Discover the nano contract behind each domain straight from the Hathor node — no registry API to configure.
-*   Works on testnet (the default) and mainnet.
+*   Works on mainnet (the default) and testnet.
 
 ## Installation
 
@@ -30,7 +30,7 @@ yarn add thoth-id-sdk
 ```typescript
 import { ThothIdSDK } from "thoth-id-sdk";
 
-// Testnet is the default; pass { network: "mainnet" } for mainnet
+// Mainnet is the default; pass { network: "testnet" } for testnet
 const sdk = new ThothIdSDK();
 
 // The domain -> contract map is collected from the node on first use,
@@ -45,7 +45,7 @@ Collect once, use many — persist the map to skip discovery on later runs. A ma
 ```typescript
 import { ThothIdSDK, Network } from "thoth-id-sdk";
 
-async function getSdk(network: Network = "testnet") {
+async function getSdk(network: Network = "mainnet") {
   const cacheKey = `thoth-contract-ids:${network}`;
   const cached = localStorage.getItem(cacheKey);
   if (cached) {
@@ -66,12 +66,12 @@ const mainnet = await getSdk("mainnet");
 
 ### Networks
 
-The Sdk talks to **testnet** unless told otherwise. Pass `network: "mainnet"` to use the public mainnet node and the mainnet ThothNamer blueprints:
+The Sdk talks to **mainnet** unless told otherwise: the public mainnet node and every mainnet ThothNamer blueprint. Pass `network: "testnet"` for testnet.
 
 ```typescript
 import { ThothIdSDK } from "thoth-id-sdk";
 
-const sdk = new ThothIdSDK({ network: "mainnet" });
+const sdk = new ThothIdSDK(); // mainnet
 
 await sdk.resolveName("jackal.htr");      // "H93A2s655jatS1zfdMF5pwf6E4s5FHnUmh"
 await sdk.checkNameStatus("jackal.htr");  // "active"
@@ -104,16 +104,18 @@ const results = await sdk.callMultipleSettled(
 Mainnet addresses start with `H`, testnet ones with `W`, and each network has its own registries — a name registered on testnet does not exist on mainnet. An app that serves both can keep one instance per network, or switch an existing one:
 
 ```typescript
-const sdk = new ThothIdSDK();  // testnet
-sdk.setNetwork("mainnet");      // drops the testnet map; mainnet's is collected on next use
+const sdk = new ThothIdSDK();  // mainnet
+sdk.setNetwork("testnet");      // drops the mainnet map; testnet's is collected on next use
 ```
 
 | Network | Node | ThothNamer blueprints |
 | --- | --- | --- |
-| `testnet` (default) | `node1.testnet.hathor.network` | `000000009108…0dd3` |
-| `mainnet` | `node1.mainnet.hathor.network` | v1.0 `000000420ca7…3e92`, v1.1 `000000203247…3183` |
+| `mainnet` (default) | `node1.mainnet.hathor.network` | v1.0 `000000420ca7…3e92`, v1.1 `000000203247…3183` |
+| `testnet` | `node1.testnet.hathor.network` | `000000009108…0dd3` |
 
-A contract stays listed under the blueprint it was *created* from even after it is upgraded, so discovery searches every version's blueprint and, when two registries claim the same domain, the oldest one wins. `nodeUrl`, `blueprintIds` and `blueprintId` still override what the network brings, and `setNetwork("mainnet")` switches an existing instance (dropping its cached map). The presets are exported as `NETWORKS`, `MAINNET_NODE_URL` and `MAINNET_BLUEPRINT_IDS`.
+A contract stays listed under the blueprint it was *created* from even after it is upgraded, so discovery searches every version's blueprint and, when two registries claim the same domain, the oldest one wins. `nodeUrl`, `blueprintIds` and `blueprintId` still override what the network brings, and `setNetwork("testnet")` switches an existing instance (dropping its cached map). The presets are exported as `NETWORKS`, `DEFAULT_NETWORK`, `MAINNET_NODE_URL`, `MAINNET_BLUEPRINT_IDS`, `TESTNET_NODE_URL` and `TESTNET_BLUEPRINT_IDS`.
+
+> **Upgrading from v3.2?** The default network changed from testnet to mainnet. Code that relied on the default to reach testnet must now pass `network: "testnet"`. A saved testnet map passed through `contractIds` without `network: "testnet"` would be used against the mainnet node, so add the option there too. `DEFAULT_NODE_URL` and `DEFAULT_BLUEPRINT_ID` keep their testnet values for compatibility and are deprecated — use `TESTNET_NODE_URL` / `TESTNET_BLUEPRINT_IDS`, or `NETWORKS[DEFAULT_NETWORK]` for the default.
 
 ### Trusted blueprints and blocked domains
 
@@ -135,10 +137,13 @@ Pass `headers` to authenticate against a node that needs it — they are sent wi
 
 ```typescript
 const sdk = new ThothIdSDK({
+  network: "testnet",
   nodeUrl: "https://node.testnet.dozer.finance/v1a/nano_contract/state",
   headers: { "X-API-Key": process.env.NODE_API_KEY },
 });
 ```
+
+`nodeUrl` only changes the node, not the network: a private testnet node needs `network: "testnet"` too, or the Sdk looks for the mainnet blueprints on it.
 
 In a browser, custom headers trigger a CORS preflight, so the node must allow them.
 

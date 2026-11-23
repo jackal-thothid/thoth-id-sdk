@@ -6,6 +6,8 @@ import {
   MAINNET_BLUEPRINT_IDS,
   MAINNET_NODE_URL,
   NETWORKS,
+  TESTNET_BLUEPRINT_IDS,
+  TESTNET_NODE_URL,
 } from "./sdk";
 
 /** Hathor network the Sdk talks to. */
@@ -23,7 +25,7 @@ export type ContractIdMap = Record<string, string>;
 export type ThothSDKOptions = {
   /**
    * Network whose node and ThothNamer blueprints are used by default.
-   * Defaults to `"testnet"`. `nodeUrl`, `blueprintIds` and `blueprintId`
+   * Defaults to `"mainnet"`. `nodeUrl`, `blueprintIds` and `blueprintId`
    * still override what the network brings.
    */
   network?: Network;
@@ -84,5 +86,7 @@ export {
   MAINNET_BLUEPRINT_IDS,
   MAINNET_NODE_URL,
   NETWORKS,
+  TESTNET_BLUEPRINT_IDS,
+  TESTNET_NODE_URL,
 };
 export default ThothIdSDK;

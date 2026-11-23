@@ -1,9 +1,13 @@
 import {
   ThothIdSDK,
   DEFAULT_BLUEPRINT_ID,
+  DEFAULT_NETWORK,
   DEFAULT_NODE_URL,
   MAINNET_BLUEPRINT_IDS,
   MAINNET_NODE_URL,
+  NETWORKS,
+  TESTNET_BLUEPRINT_IDS,
+  TESTNET_NODE_URL,
 } from '../src/index';
 import * as http from 'http';
 import { AddressInfo } from 'net';
@@ -82,7 +86,7 @@ describe('custom headers', () => {
       } else if (pathname.endsWith('/history')) {
         json(res, 200, { success: true, history: [{ nc_method: 'initialize', nc_args_decoded: ['htr'] }] });
       } else {
-        json(res, 200, { success: true, blueprint_id: DEFAULT_BLUEPRINT_ID, calls: {} });
+        json(res, 200, { success: true, blueprint_id: MAINNET_BLUEPRINT_IDS[0], calls: {} });
       }
     };
     const sdk = new ThothIdSDK({
@@ -91,7 +95,8 @@ describe('custom headers', () => {
     });
 
     await expect(sdk.loadContractIds()).resolves.toEqual({ htr: CONTRACT_ID });
-    expect(requests).toHaveLength(3);
+    // Mainnet by default: one `creation` per blueprint, then `history` and `state`.
+    expect(requests).toHaveLength(4);
     for (const req of requests) {
       expect(req.headers['x-api-key']).toBe('secret');
     }
@@ -171,13 +176,28 @@ describe('callMultipleSettled', () => {
 });
 
 describe('networks', () => {
-  it('defaults to testnet', () => {
+  it('defaults to mainnet', () => {
     const sdk = new ThothIdSDK();
 
+    expect(DEFAULT_NETWORK).toBe('mainnet');
+    expect(sdk.network).toBe('mainnet');
+    expect(sdk.nodeUrl).toBe(MAINNET_NODE_URL);
+    expect(sdk.blueprintIds).toEqual(MAINNET_BLUEPRINT_IDS);
+    expect(sdk.blueprintId).toBe(MAINNET_BLUEPRINT_IDS[0]);
+  });
+
+  it('uses the testnet node and blueprint when asked', () => {
+    const sdk = new ThothIdSDK({ network: 'testnet' });
+
     expect(sdk.network).toBe('testnet');
-    expect(sdk.nodeUrl).toBe(DEFAULT_NODE_URL);
-    expect(sdk.blueprintIds).toEqual([DEFAULT_BLUEPRINT_ID]);
-    expect(sdk.blueprintId).toBe(DEFAULT_BLUEPRINT_ID);
+    expect(sdk.nodeUrl).toBe(TESTNET_NODE_URL);
+    expect(sdk.blueprintIds).toEqual(TESTNET_BLUEPRINT_IDS);
+  });
+
+  it('keeps the deprecated DEFAULT_* constants at their testnet values', () => {
+    expect(DEFAULT_NODE_URL).toBe(TESTNET_NODE_URL);
+    expect(DEFAULT_BLUEPRINT_ID).toBe(TESTNET_BLUEPRINT_IDS[0]);
+    expect(NETWORKS[DEFAULT_NETWORK].nodeUrl).toBe(MAINNET_NODE_URL);
   });
 
   it('uses the mainnet node and every mainnet blueprint', () => {
@@ -206,10 +226,10 @@ describe('networks', () => {
 
   it('switches network and drops the map', () => {
     const sdk = new ThothIdSDK({ contractIds: { htr: CONTRACT_ID } });
-    sdk.setNetwork('mainnet');
+    sdk.setNetwork('testnet');
 
-    expect(sdk.nodeUrl).toBe(MAINNET_NODE_URL);
-    expect(sdk.blueprintIds).toEqual(MAINNET_BLUEPRINT_IDS);
+    expect(sdk.nodeUrl).toBe(TESTNET_NODE_URL);
+    expect(sdk.blueprintIds).toEqual(TESTNET_BLUEPRINT_IDS);
     expect(sdk.getDomains()).toEqual([]);
   });
 });

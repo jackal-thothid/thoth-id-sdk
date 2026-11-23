@@ -2,8 +2,11 @@
   "_comment": "Expected state of the public Hathor testnet. These tests need no setup: they run against the live ThothNamer registries the Sdk discovers on its own. Update this file if the testnet contracts change.",
   "network": "testnet",
   "expectedNodeUrl": "https://node1.testnet.hathor.network/v1a/nano_contract/state",
-  "sdkOptions": {},
-  "_domains_comment": "The registries the tests require, and the lower bound of what discovery must return. Each one listed here must be discovered and must point at exactly this contract; registries added to testnet later are fine and simply ignored. Add an entry here to cover a new domain.",
+  "_sdkOptions_comment": "Testnet has to be asked for explicitly since mainnet became the default.",
+  "sdkOptions": {
+    "network": "testnet"
+  },
+  "_domains_comment": "The registries the tests require, and the lower bound of what discovery must return. Each one listed here must be discovered and must point at exactly this contract; registries added later are fine and simply ignored. Add an entry here to cover a new domain.",
   "domains": [
     {
       "suffix": "htr",
