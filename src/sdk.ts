@@ -5,10 +5,26 @@ import * as schemas from "./schemas";
 import { BlockedDomain, CallResult, ContractIdMap, Network, NetworkConfig, ThothSDKOptions } from "./index";
 
 /** State endpoint of the public testnet node. */
-export const DEFAULT_NODE_URL = "https://node1.testnet.hathor.network/v1a/nano_contract/state";
+export const TESTNET_NODE_URL = "https://node1.testnet.hathor.network/v1a/nano_contract/state";
 
-/** Blueprint ID of the ThothNamer nano contract on testnet. */
-export const DEFAULT_BLUEPRINT_ID = "000000009108a3ab3c24297df5e33679177fb8a051c133bcad467a8a23bf0dd3";
+/** ThothNamer blueprint IDs on testnet. */
+export const TESTNET_BLUEPRINT_IDS = [
+  "000000009108a3ab3c24297df5e33679177fb8a051c133bcad467a8a23bf0dd3",
+];
+
+/**
+ * Testnet node URL, from when testnet was the default network.
+ * @deprecated Kept with its testnet value for compatibility. Use
+ * `TESTNET_NODE_URL`, or `NETWORKS[DEFAULT_NETWORK].nodeUrl` for the default.
+ */
+export const DEFAULT_NODE_URL = TESTNET_NODE_URL;
+
+/**
+ * Testnet ThothNamer blueprint, from when testnet was the default network.
+ * @deprecated Kept with its testnet value for compatibility. Use
+ * `TESTNET_BLUEPRINT_IDS`, or `NETWORKS[DEFAULT_NETWORK].blueprintIds`.
+ */
+export const DEFAULT_BLUEPRINT_ID = TESTNET_BLUEPRINT_IDS[0];
 
 /** State endpoint of the public mainnet node. */
 export const MAINNET_NODE_URL = "https://node1.mainnet.hathor.network/v1a/nano_contract/state";
@@ -20,11 +36,11 @@ export const MAINNET_BLUEPRINT_IDS = [
 ];
 
 /** Network used when none is given. */
-export const DEFAULT_NETWORK: Network = "testnet";
+export const DEFAULT_NETWORK: Network = "mainnet";
 
 /** What each network brings by default. */
 export const NETWORKS: Readonly<Record<Network, Readonly<NetworkConfig>>> = {
-  testnet: { nodeUrl: DEFAULT_NODE_URL, blueprintIds: [DEFAULT_BLUEPRINT_ID] },
+  testnet: { nodeUrl: TESTNET_NODE_URL, blueprintIds: TESTNET_BLUEPRINT_IDS },
   mainnet: { nodeUrl: MAINNET_NODE_URL, blueprintIds: MAINNET_BLUEPRINT_IDS },
 };
 

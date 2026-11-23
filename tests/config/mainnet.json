@@ -2,10 +2,9 @@
   "_comment": "Expected state of Hathor mainnet. The .htr registry was created from ThothNamer v1.0 and later upgraded to v1.1, so discovery has to search both blueprints. Update this file if the mainnet contracts change.",
   "network": "mainnet",
   "expectedNodeUrl": "https://node1.mainnet.hathor.network/v1a/nano_contract/state",
-  "sdkOptions": {
-    "network": "mainnet"
-  },
-  "_domains_comment": "The registries the tests require, and the lower bound of what discovery must return. Each one listed here must be discovered and must point at exactly this contract; registries added to testnet later are fine and simply ignored. Add an entry here to cover a new domain.",
+  "_sdkOptions_comment": "Empty on purpose: mainnet is the default network, so this suite also checks the default.",
+  "sdkOptions": {},
+  "_domains_comment": "The registries the tests require, and the lower bound of what discovery must return. Each one listed here must be discovered and must point at exactly this contract; registries added later are fine and simply ignored. Add an entry here to cover a new domain.",
   "domains": [
     {
       "suffix": "htr",
